@@ -1,6 +1,10 @@
+import { logger } from "../logger.js";
+
 const BASE_URL = "https://stepik.org/oauth2/token/";
 
 export const getAccessToken = async (): Promise<string> => {
+  logger.info("Requesting Stepik access token", { url: BASE_URL });
+
   const response = await fetch(BASE_URL, {
     method: "POST",
     headers: {
@@ -14,6 +18,10 @@ export const getAccessToken = async (): Promise<string> => {
   });
 
   if (!response.ok) {
+    logger.error("Failed to get access token", {
+      status: response.status,
+      statusText: response.statusText,
+    });
     throw new Error(`Failed to get access token: ${response.status} ${response.statusText}`);
   }
 

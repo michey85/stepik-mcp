@@ -1,18 +1,19 @@
 import { courseNames } from "../constants/courses.js";
 import { getAccessToken } from "./auth.js";
+import { logger } from "../logger.js";
 
 const BENEFITS_URL = "https://stepik.org/api/course-benefits?page=1";
 
-export const convertToMessage = (benefits: any[]) => {
+export const convertToMessage = (benefits: any[], period = 24) => {
 // Граница: последние 24 часа от момента запуска
 const now = new Date();
-const since = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+const since = new Date(now.getTime() - period * 60 * 60 * 1000);
 
-// Фильтруем только за последние 24 часа
+// Фильтруем только за последние {period} часа
 const recent = benefits.filter(item => new Date(item.time) >= since);
 
 if (recent.length === 0) {
-  return "📭 За последние 24 часа покупок не было.";
+  return `📭 За последние ${period} часа покупок не было.`;
 }
 
 // Группируем по курсу
@@ -31,7 +32,7 @@ for (const item of recent) {
 
 // Формируем сообщение
 const dateStr = now.toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
-let lines = [`🛒 *Покупки за последние 24 часа* (по ${dateStr} МСК)\n`];
+let lines = [`🛒 *Покупки за последние ${period} часа* (по ${dateStr} МСК)\n`];
 
 // Сортируем по убыванию числа покупок
 const sorted = Object.entries(byCourse).sort((a, b) => b[1].count - a[1].count);
@@ -59,6 +60,9 @@ return lines.join("\n");
 
 export async function getCourseBenefits(): Promise<string[]> {
   const accessToken = await getAccessToken();
+
+  logger.info("Fetching course benefits", { url: BENEFITS_URL });
+
   const response = await fetch(BENEFITS_URL, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -66,6 +70,10 @@ export async function getCourseBenefits(): Promise<string[]> {
   });
 
   if (!response.ok) {
+    logger.error("Failed to fetch course benefits", {
+      status: response.status,
+      statusText: response.statusText,
+    });
     throw new Error(`Failed to fetch course benefits: ${response.status} ${response.statusText}`);
   }
 

@@ -1,10 +1,6 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import server from "./server.js";
 
-declare const process: {
-  exit(code?: number): never;
-};
-
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);

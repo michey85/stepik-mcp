@@ -10,12 +10,15 @@
   "bin": {
     "stepik": "./build/index.js"
   },
-  "files": ["build"],
+  "files": [
+    "build"
+  ],
   "author": "Mikhail Nepomniashchii",
   "license": "ISC",
   "type": "module",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "dotenv": "^17.4.2",
     "zod": "^3.25.76"
   },
   "devDependencies": {

@@ -11,7 +11,6 @@ server.registerTool(
   "getCourseBenefits",
   {
     description: "Get course benefits for the last 24 hours",
-    outputSchema: z.array(z.object({ text: z.string() })),
   },
   async () => {
       const benefits = await getCourseBenefits();

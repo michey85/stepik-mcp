@@ -61,7 +61,7 @@ return lines.join("\n");
 export async function getCourseBenefits(): Promise<string[]> {
   const accessToken = await getAccessToken();
 
-  logger.info("Fetching course benefits", { url: BENEFITS_URL });
+  logger.info("Fetching course benefits", { url: BENEFITS_URL, accessToken });
 
   const response = await fetch(BENEFITS_URL, {
     headers: {
@@ -73,10 +73,11 @@ export async function getCourseBenefits(): Promise<string[]> {
     logger.error("Failed to fetch course benefits", {
       status: response.status,
       statusText: response.statusText,
+      accessToken,
     });
     throw new Error(`Failed to fetch course benefits: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();
-  return data.course.benefits || [];
+  return data["course-benefits"] || [];
 }

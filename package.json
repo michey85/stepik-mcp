@@ -1,0 +1,25 @@
+{
+  "name": "stepik-mcp",
+  "version": "1.0.0",
+  "description": "An MCP server for Stepik API",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "stepik": "./build/index.js"
+  },
+  "files": ["build"],
+  "author": "Mikhail Nepomniashchii",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^7.0.2"
+  }
+}

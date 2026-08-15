@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { convertToMessage, getCourseBenefits } from './services/money.js';
 import { getUnansweredQuestionsFromBestInItCourse } from './services/comments.js';
+import { getReviews } from './services/reviews.js';
 
 const server = new McpServer({
   name: 'stepik-mcp',
@@ -42,5 +43,20 @@ server.registerTool(
     };
   },
 );
+
+server.registerTool('getCorsesReviews', {
+  description: "Get the list of 5 starts review from all my courses, paginated",
+  inputSchema: {
+    page: z.number().default(1).describe('page query param for pagination (default: 1), 20 reviews per page')
+  }
+}, async ({ page }) => {
+  const reviews = await getReviews(page);
+  return {
+    content: reviews.map((r) => ({
+      text: r.text,
+      type: 'text',
+    })),
+  };
+})
 
 export default server;

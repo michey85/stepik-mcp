@@ -38,3 +38,9 @@ export async function getReviews(page = 1): Promise<Review[]> {
   const data: Response = await response.json();
   return data['course-reviews'];
 }
+
+export async function getReviewsByCourse(courseId: number, page = 1): Promise<Review[]> {
+  const response = await fetch(`${REVIEWS_URL}&course=${courseId}&page=${page}`);
+  const data: Response = await response.json();
+  return data['course-reviews'];
+}

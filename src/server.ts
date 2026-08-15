@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { convertToMessage, getCourseBenefits } from './services/money.js';
+import { getUnansweredQuestionsFromBestInItCourse } from './services/comments.js';
 
 const server = new McpServer({
   name: 'stepik-mcp',
@@ -21,6 +22,23 @@ server.registerTool(
 
     return {
       content: [{ text: message, type: 'text' }],
+    };
+  },
+);
+
+server.registerTool(
+  'getUnansweredQuestionsFromBestInItCourse',
+  {
+    description: 'Get unanswered questions from the Best in IT course',
+    inputSchema: {},
+  },
+  async () => {
+    const unanswered = await getUnansweredQuestionsFromBestInItCourse();
+    return {
+      content: unanswered.map((q) => ({
+        text: `${q.text} with URL: ${q.discussion_url}`,
+        type: 'text',
+      })),
     };
   },
 );

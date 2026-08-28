@@ -13,6 +13,7 @@ import {
   createPromoCode,
   getActivePromoCodesByCourse,
 } from './services/promoCodes.js';
+import { createChoiceStep } from './services/stepSources.js';
 import { toPlain } from './helpers/html.js';
 import { COURSES, COURSES_URI } from './resources/courses.js';
 
@@ -329,6 +330,85 @@ server.registerTool(
       content: [
         {
           text: `Promo code created with id ${promoCode.id}: ${promoCode.name}`,
+          type: 'text',
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
+  'addMultipleChoiceQuiz',
+  {
+    description:
+      'Add a new multiple-choice (or single-choice) quiz step to a Stepik lesson',
+    inputSchema: {
+      lessonId: z.number().describe('The ID of the lesson'),
+      position: z.number().describe('Position of the step within the lesson'),
+      question: z.string().describe('The quiz question text'),
+      options: z
+        .array(
+          z.object({
+            text: z.string().describe('Option text'),
+            isCorrect: z.boolean().describe('Whether this option is correct'),
+            feedback: z
+              .string()
+              .optional()
+              .describe('Optional feedback shown when this option is picked'),
+          }),
+        )
+        .min(2)
+        .describe('The list of answer options'),
+      isMultipleChoice: z
+        .boolean()
+        .optional()
+        .describe(
+          'Whether multiple options can be selected (default: false, i.e. single choice)',
+        ),
+      preserveOrder: z
+        .boolean()
+        .optional()
+        .describe('Whether to keep options in the given order (default: false, i.e. shuffled)'),
+      isOptionsFeedback: z
+        .boolean()
+        .optional()
+        .describe('Whether to show per-option feedback (default: false)'),
+      feedbackCorrect: z
+        .string()
+        .optional()
+        .describe('Optional feedback shown on a correct submission'),
+      feedbackWrong: z
+        .string()
+        .optional()
+        .describe('Optional feedback shown on a wrong submission'),
+    },
+  },
+  async ({
+    lessonId,
+    position,
+    question,
+    options,
+    isMultipleChoice,
+    preserveOrder,
+    isOptionsFeedback,
+    feedbackCorrect,
+    feedbackWrong,
+  }) => {
+    const step = await createChoiceStep({
+      lessonId,
+      position,
+      question,
+      options,
+      isMultipleChoice,
+      preserveOrder,
+      isOptionsFeedback,
+      feedbackCorrect,
+      feedbackWrong,
+    });
+    return {
+      content: [
+        {
+          text: `Quiz step created with id ${step.id} at position ${step.position} in lesson ${step.lesson}`,
           type: 'text',
         },
       ],

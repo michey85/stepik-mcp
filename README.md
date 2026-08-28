@@ -24,6 +24,7 @@ MCP-сервер для работы с [Stepik API](https://stepik.org/api/docs
 | `getStepContent` | Содержимое одного шага по ID |
 | `getActivePromoCodesByCourse` | Активные промокоды по курсу, постранично |
 | `addPromoCode` | Создать промокод для курса |
+| `addMultipleChoiceQuiz` | Добавить в урок шаг-квиз с вариантами ответа (одиночный или множественный выбор) |
 
 ### Ресурсы (resources)
 

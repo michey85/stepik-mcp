@@ -48,13 +48,6 @@ export interface Response {
   notifications: Notification[];
 }
 
-export function toPlain(html = '') {
-  return html
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 export async function getNotifications(
   page = 1,
   isUnread?: boolean,

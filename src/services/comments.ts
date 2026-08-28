@@ -1,4 +1,5 @@
 import { getAccessToken } from './auth.js';
+import { toPlain } from '../helpers/html.js';
 
 const BASE_URL = 'https://stepik.org/api/discussion-proxies/77-9759908-1';
 const COMMENTS_URL = 'https://stepik.org/api/comments';
@@ -121,13 +122,6 @@ interface UnansweredQuestion {
   discussion_url: string;
 }
 
-function toPlain(html = '') {
-  return html
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 export async function getUnansweredQuestionsFromBestInItCourse(): Promise<
   UnansweredQuestion[]
 > {
@@ -178,4 +172,69 @@ export async function getUnansweredQuestionsFromBestInItCourse(): Promise<
     created_at: c.time,
     discussion_url: `https://stepik.org/lesson/2246724/step/2?discussion=${c.id}`,
   }));
+}
+
+export async function getCommentById(commentId: number): Promise<Comment> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`${COMMENTS_URL}/${commentId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const data: CommentsObject = await response.json();
+  const comment = data.comments[0];
+  if (!comment) {
+    throw new Error(`Comment ${commentId} not found`);
+  }
+  return comment;
+}
+
+export async function postCommentReply(
+  parentId: number,
+  text: string,
+): Promise<Comment> {
+  const accessToken = await getAccessToken();
+
+  const parentResponse = await fetch(`${COMMENTS_URL}/${parentId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+    },
+  });
+  if (!parentResponse.ok) {
+    throw new Error(`HTTP error! status: ${parentResponse.status}`);
+  }
+  const parentData: CommentsObject = await parentResponse.json();
+  const parentComment = parentData.comments[0];
+  if (!parentComment) {
+    throw new Error(`Parent comment ${parentId} not found`);
+  }
+
+  const response = await fetch(COMMENTS_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      comment: {
+        target: parentComment.target,
+        parent: parentId,
+        text,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data: CommentsObject = await response.json();
+  return data.comments[0];
 }

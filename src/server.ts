@@ -1,9 +1,14 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { convertToMessage, getCourseBenefits } from './services/money.js';
-import { getUnansweredQuestionsFromBestInItCourse } from './services/comments.js';
+import {
+  getCommentById,
+  getUnansweredQuestionsFromBestInItCourse,
+  postCommentReply,
+} from './services/comments.js';
 import { getReviews, getReviewsByCourse } from './services/reviews.js';
-import { getNotifications, toPlain } from './services/notifications.js';
+import { getNotifications } from './services/notifications.js';
+import { toPlain } from './helpers/html.js';
 import { COURSES, COURSES_URI } from './resources/courses.js';
 
 const server = new McpServer({
@@ -42,6 +47,50 @@ server.registerTool(
         text: `${q.text} with URL: ${q.discussion_url}`,
         type: 'text',
       })),
+    };
+  },
+);
+
+server.registerTool(
+  'answerComment',
+  {
+    description:
+      'Post a reply to a Stepik comment/question (answers a student on the discussion)',
+    inputSchema: {
+      parentCommentId: z.number().describe('The ID of the comment to reply to'),
+      text: z.string().describe('The reply text'),
+    },
+  },
+  async ({ parentCommentId, text }) => {
+    const reply = await postCommentReply(parentCommentId, text);
+    return {
+      content: [
+        {
+          text: `Reply posted with id ${reply.id}`,
+          type: 'text',
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
+  'getCommentById',
+  {
+    description: 'Get a single Stepik comment/question by its ID',
+    inputSchema: {
+      commentId: z.number().describe('The ID of the comment'),
+    },
+  },
+  async ({ commentId }) => {
+    const comment = await getCommentById(commentId);
+    return {
+      content: [
+        {
+          text: toPlain(comment.text || ''),
+          type: 'text',
+        },
+      ],
     };
   },
 );
@@ -122,10 +171,7 @@ server.registerTool(
         .number()
         .default(1)
         .describe('page query param for pagination (default: 1)'),
-      isUnread: z
-        .boolean()
-        .optional()
-        .describe('Filter by unread status'),
+      isUnread: z.boolean().optional().describe('Filter by unread status'),
     },
   },
   async ({ page, isUnread }) => {

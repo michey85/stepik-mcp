@@ -1,9 +1,13 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import server from './server.js';
 import dotenv from 'dotenv';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 dotenv.config({
-  path: '/Users/mishanep/Developer/stepik-mcp/.env.local',
+  path: path.resolve(__dirname, '..', '.env.local'),
   quiet: true,
 });
 

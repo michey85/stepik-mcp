@@ -1,6 +1,7 @@
 export interface StepikCourse {
   id: number;
   title: string;
+  isPackage?: boolean;
 }
 
 export const COURSES_URI = 'stepik://courses';
@@ -17,4 +18,6 @@ export const COURSES: readonly StepikCourse[] = [
   },
   { id: 200433, title: 'Тестирование JavaScript и React приложений' },
   { id: 121859, title: 'TypeScript для профессиональной разработки' },
+  { id: 180789, title: 'Профессия Frontend-разработчик', isPackage: true },
+  { id: 249305, title: 'MERN стек: современная веб-разработка от клиента до сервера', isPackage: true },
 ] as const;

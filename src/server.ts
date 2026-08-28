@@ -9,6 +9,10 @@ import {
 import { getReviews, getReviewsByCourse } from './services/reviews.js';
 import { getNotifications } from './services/notifications.js';
 import { getLessonContent, getStepContent } from './services/lessons.js';
+import {
+  createPromoCode,
+  getActivePromoCodesByCourse,
+} from './services/promoCodes.js';
 import { toPlain } from './helpers/html.js';
 import { COURSES, COURSES_URI } from './resources/courses.js';
 
@@ -239,6 +243,92 @@ server.registerTool(
       content: [
         {
           text: `Step ${step.id} (position ${step.position}) [${step.type}]: ${step.text}`,
+          type: 'text',
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
+  'getActivePromoCodesByCourse',
+  {
+    description:
+      'Get the list of currently active promo codes for a specific course. Paginated. Request all pages to get active promo codes for a course.',
+    inputSchema: {
+      courseId: z.number().describe('The ID of the course'),
+      page: z
+        .number()
+        .default(1)
+        .describe('page query param for pagination (default: 1)'),
+    },
+  },
+  async ({ courseId, page }) => {
+    const promoCodes = await getActivePromoCodesByCourse(courseId, page);
+    return {
+      content: promoCodes.map((p) => ({
+        text: `${p.id}: ${p.name} - discount ${p.discount}${p.is_percent_discount ? '%' : ''}${p.expire_date ? `, expires ${p.expire_date}` : ''}`,
+        type: 'text',
+      })),
+    };
+  },
+);
+
+server.registerTool(
+  'addPromoCode',
+  {
+    description: 'Create a new promo code for a specific course',
+    inputSchema: {
+      courseId: z.number().describe('The ID of the course'),
+      name: z.string().describe('The promo code name (the code itself)'),
+      discount: z
+        .number()
+        .describe(
+          'The discount amount (percent or absolute, see isPercentDiscount)',
+        ),
+      isPercentDiscount: z
+        .boolean()
+        .optional()
+        .describe('Whether discount is a percentage (default: false)'),
+      description: z.string().optional().describe('Optional description'),
+      limitPerUser: z
+        .number()
+        .optional()
+        .describe('Optional usage limit per user'),
+      startDate: z
+        .string()
+        .optional()
+        .describe('Optional ISO datetime when the promo code becomes active'),
+      expireDate: z
+        .string()
+        .optional()
+        .describe('Optional ISO datetime when the promo code expires'),
+    },
+  },
+  async ({
+    courseId,
+    name,
+    discount,
+    isPercentDiscount,
+    description,
+    limitPerUser,
+    startDate,
+    expireDate,
+  }) => {
+    const promoCode = await createPromoCode({
+      courseId,
+      name,
+      discount,
+      isPercentDiscount,
+      description,
+      limitPerUser,
+      startDate,
+      expireDate,
+    });
+    return {
+      content: [
+        {
+          text: `Promo code created with id ${promoCode.id}: ${promoCode.name}`,
           type: 'text',
         },
       ],

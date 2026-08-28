@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { convertToMessage, getCourseBenefits } from './services/money.js';
 import { getUnansweredQuestionsFromBestInItCourse } from './services/comments.js';
 import { getReviews, getReviewsByCourse } from './services/reviews.js';
+import { getNotifications, toPlain } from './services/notifications.js';
 import { COURSES, COURSES_URI } from './resources/courses.js';
 
 const server = new McpServer({
@@ -112,11 +113,44 @@ server.registerTool(
   },
 );
 
+server.registerTool(
+  'getNotifications',
+  {
+    description: 'Get my Stepik notifications, paginated',
+    inputSchema: {
+      page: z
+        .number()
+        .default(1)
+        .describe('page query param for pagination (default: 1)'),
+      isUnread: z
+        .boolean()
+        .optional()
+        .describe('Filter by unread status'),
+    },
+  },
+  async ({ page, isUnread }) => {
+    const notifications = await getNotifications(page, isUnread);
+    return {
+      content: notifications.map((n) => {
+        const courseNames = (n.courses || [])
+          .map((id) => COURSES.find((c) => c.id === id)?.title)
+          .filter(Boolean);
+        const coursePrefix =
+          courseNames.length > 0 ? `[${courseNames.join(', ')}] ` : '';
+        return {
+          text: `${coursePrefix}[${n.time}] ${n.type}: ${toPlain(n.html_text)} Action URL: ${n.context.action_url}`,
+          type: 'text',
+        };
+      }),
+    };
+  },
+);
+
 server.registerResource(
-  'courses',
+  'list-of-my-courses',
   COURSES_URI,
   {
-    title: 'Courses',
+    title: 'List of My Courses',
     description: 'List of my Stepik courses',
     mimeType: 'application/json',
   },

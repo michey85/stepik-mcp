@@ -13,7 +13,7 @@ import {
   createPromoCode,
   getActivePromoCodesByCourse,
 } from './services/promoCodes.js';
-import { createChoiceStep } from './services/stepSources.js';
+import { createChoiceStep, createCodeStep } from './services/stepSources.js';
 import { toPlain } from './helpers/html.js';
 import { COURSES, COURSES_URI } from './resources/courses.js';
 
@@ -409,6 +409,95 @@ server.registerTool(
       content: [
         {
           text: `Quiz step created with id ${step.id} at position ${step.position} in lesson ${step.lesson}`,
+          type: 'text',
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
+  'addProgrammingTask',
+  {
+    description:
+      'Add a new programming (code challenge) step to a Stepik lesson',
+    inputSchema: {
+      lessonId: z.number().describe('The ID of the lesson'),
+      position: z.number().describe('Position of the step within the lesson'),
+      question: z.string().describe('The task statement (HTML allowed)'),
+      checkerCode: z
+        .string()
+        .describe(
+          'Python checker script defining generate()/check()/solve() (or just check(), for simple test-case-based checking) used to validate submissions',
+        ),
+      testCases: z
+        .array(
+          z.object({
+            input: z.string().describe('Sample input fed to the solution'),
+            output: z.string().describe('Expected output for this input'),
+          }),
+        )
+        .min(1)
+        .describe('Sample test cases shown to the student'),
+      executionTimeLimit: z
+        .number()
+        .optional()
+        .describe('Execution time limit in seconds (default: 5)'),
+      executionMemoryLimit: z
+        .number()
+        .optional()
+        .describe('Execution memory limit in MB (default: 256)'),
+      samplesCount: z
+        .number()
+        .optional()
+        .describe('Number of generated samples used for grading (default: 1)'),
+      templates: z
+        .array(
+          z.object({
+            language: z
+              .string()
+              .describe('Language identifier, e.g. "javascript", "python3"'),
+            header: z
+              .string()
+              .optional()
+              .describe('Read-only code shown before the editable stub'),
+            code: z.string().optional().describe('Editable code stub'),
+            footer: z
+              .string()
+              .optional()
+              .describe('Read-only code shown after the editable stub'),
+          }),
+        )
+        .optional()
+        .describe('Optional per-language code templates for the student'),
+    },
+  },
+  async ({
+    lessonId,
+    position,
+    question,
+    checkerCode,
+    testCases,
+    executionTimeLimit,
+    executionMemoryLimit,
+    samplesCount,
+    templates,
+  }) => {
+    const step = await createCodeStep({
+      lessonId,
+      position,
+      question,
+      checkerCode,
+      testCases,
+      executionTimeLimit,
+      executionMemoryLimit,
+      samplesCount,
+      templates,
+    });
+    return {
+      content: [
+        {
+          text: `Programming task created with id ${step.id} at position ${step.position} in lesson ${step.lesson}`,
           type: 'text',
         },
       ],

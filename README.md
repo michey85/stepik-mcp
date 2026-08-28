@@ -25,6 +25,7 @@ MCP-сервер для работы с [Stepik API](https://stepik.org/api/docs
 | `getActivePromoCodesByCourse` | Активные промокоды по курсу, постранично |
 | `addPromoCode` | Создать промокод для курса |
 | `addMultipleChoiceQuiz` | Добавить в урок шаг-квиз с вариантами ответа (одиночный или множественный выбор) |
+| `addProgrammingTask` | Добавить в урок шаг с задачей по программированию (code challenge): условие, чекер, тест-кейсы, лимиты и шаблоны кода по языкам |
 
 ### Ресурсы (resources)
 

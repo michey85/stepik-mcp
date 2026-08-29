@@ -369,10 +369,6 @@ server.registerTool(
         .describe(
           'Whether multiple options can be selected (default: false, i.e. single choice)',
         ),
-      preserveOrder: z
-        .boolean()
-        .optional()
-        .describe('Whether to keep options in the given order (default: false, i.e. shuffled)'),
       isOptionsFeedback: z
         .boolean()
         .optional()
@@ -385,6 +381,10 @@ server.registerTool(
         .string()
         .optional()
         .describe('Optional feedback shown on a wrong submission'),
+      points: z
+        .number()
+        .optional()
+        .describe('Points awarded for completing the step (default: 1)'),
     },
   },
   async ({
@@ -393,10 +393,10 @@ server.registerTool(
     question,
     options,
     isMultipleChoice,
-    preserveOrder,
     isOptionsFeedback,
     feedbackCorrect,
     feedbackWrong,
+    points,
   }) => {
     const step = await createChoiceStep({
       lessonId,
@@ -404,10 +404,10 @@ server.registerTool(
       question,
       options,
       isMultipleChoice,
-      preserveOrder,
       isOptionsFeedback,
       feedbackCorrect,
       feedbackWrong,
+      points,
     });
     return {
       content: [
@@ -474,6 +474,10 @@ server.registerTool(
         )
         .optional()
         .describe('Optional per-language code templates for the student'),
+      points: z
+        .number()
+        .optional()
+        .describe('Points awarded for completing the step (default: 1)'),
     },
   },
   async ({
@@ -486,6 +490,7 @@ server.registerTool(
     executionMemoryLimit,
     samplesCount,
     templates,
+    points,
   }) => {
     const step = await createCodeStep({
       lessonId,
@@ -497,6 +502,7 @@ server.registerTool(
       executionMemoryLimit,
       samplesCount,
       templates,
+      points,
     });
     return {
       content: [

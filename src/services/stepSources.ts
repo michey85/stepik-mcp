@@ -14,11 +14,11 @@ export interface CreateChoiceStepParams {
   question: string;
   options: ChoiceOption[];
   isMultipleChoice?: boolean;
-  preserveOrder?: boolean;
   isHtmlEnabled?: boolean;
   isOptionsFeedback?: boolean;
   feedbackCorrect?: string;
   feedbackWrong?: string;
+  points?: number;
 }
 
 export interface StepSource {
@@ -57,6 +57,7 @@ export interface CreateCodeStepParams {
   executionMemoryLimit?: number;
   samplesCount?: number;
   templates?: CodeTemplate[];
+  points?: number;
 }
 
 function buildTemplatesData(templates: CodeTemplate[]): string {
@@ -91,6 +92,7 @@ export async function createCodeStep(
       stepSource: {
         lesson: params.lessonId,
         position: params.position,
+        cost: params.points ?? 1,
         block: {
           name: 'code',
           text: params.question,
@@ -144,6 +146,7 @@ export async function createChoiceStep(
       stepSource: {
         lesson: params.lessonId,
         position: params.position,
+        cost: params.points ?? 1,
         block: {
           name: 'choice',
           text: params.question,
@@ -157,7 +160,7 @@ export async function createChoiceStep(
             is_html_enabled: params.isHtmlEnabled ?? true,
             sample_size: params.options.length,
             is_multiple_choice: params.isMultipleChoice ?? false,
-            preserve_order: params.preserveOrder ?? false,
+            preserve_order: false,
             is_options_feedback: params.isOptionsFeedback ?? false,
           },
           feedback_correct: params.feedbackCorrect,

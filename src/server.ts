@@ -13,7 +13,12 @@ import {
   createPromoCode,
   getActivePromoCodesByCourse,
 } from './services/promoCodes.js';
-import { createChoiceStep, createCodeStep } from './services/stepSources.js';
+import {
+  createChoiceStep,
+  createCodeStep,
+  updateChoiceStep,
+  updateCodeStep,
+} from './services/stepSources.js';
 import {
   getCertificatePoints,
   updateCertificatePoints,
@@ -421,6 +426,89 @@ server.registerTool(
 );
 
 server.registerTool(
+  'updateMultipleChoiceQuiz',
+  {
+    description:
+      'Update an existing multiple-choice (or single-choice) quiz step. Only the provided fields are changed; everything else is left as-is.',
+    inputSchema: {
+      stepId: z.number().describe('The ID of the quiz step to update'),
+      position: z
+        .number()
+        .optional()
+        .describe('New position of the step within the lesson'),
+      question: z.string().optional().describe('The quiz question text'),
+      options: z
+        .array(
+          z.object({
+            text: z.string().describe('Option text'),
+            isCorrect: z.boolean().describe('Whether this option is correct'),
+            feedback: z
+              .string()
+              .optional()
+              .describe('Optional feedback shown when this option is picked'),
+          }),
+        )
+        .min(2)
+        .optional()
+        .describe(
+          'The full list of answer options (replaces all existing options)',
+        ),
+      isMultipleChoice: z
+        .boolean()
+        .optional()
+        .describe('Whether multiple options can be selected'),
+      isOptionsFeedback: z
+        .boolean()
+        .optional()
+        .describe('Whether to show per-option feedback'),
+      feedbackCorrect: z
+        .string()
+        .optional()
+        .describe('Feedback shown on a correct submission'),
+      feedbackWrong: z
+        .string()
+        .optional()
+        .describe('Feedback shown on a wrong submission'),
+      points: z
+        .number()
+        .optional()
+        .describe('Points awarded for completing the step'),
+    },
+  },
+  async ({
+    stepId,
+    position,
+    question,
+    options,
+    isMultipleChoice,
+    isOptionsFeedback,
+    feedbackCorrect,
+    feedbackWrong,
+    points,
+  }) => {
+    const step = await updateChoiceStep({
+      stepId,
+      position,
+      question,
+      options,
+      isMultipleChoice,
+      isOptionsFeedback,
+      feedbackCorrect,
+      feedbackWrong,
+      points,
+    });
+    return {
+      content: [
+        {
+          text: `Quiz step ${step.id} updated (position ${step.position} in lesson ${step.lesson})`,
+          type: 'text',
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
   'addProgrammingTask',
   {
     description:
@@ -508,6 +596,113 @@ server.registerTool(
       content: [
         {
           text: `Programming task created with id ${step.id} at position ${step.position} in lesson ${step.lesson}`,
+          type: 'text',
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
+  'updateProgrammingTask',
+  {
+    description:
+      'Update an existing programming (code challenge) step. Only the provided fields are changed; everything else is left as-is.',
+    inputSchema: {
+      stepId: z.number().describe('The ID of the programming task step to update'),
+      position: z
+        .number()
+        .optional()
+        .describe('New position of the step within the lesson'),
+      question: z
+        .string()
+        .optional()
+        .describe('The task statement (HTML allowed)'),
+      checkerCode: z
+        .string()
+        .optional()
+        .describe(
+          'Python checker script defining generate()/check()/solve() (or just check(), for simple test-case-based checking) used to validate submissions',
+        ),
+      testCases: z
+        .array(
+          z.object({
+            input: z.string().describe('Sample input fed to the solution'),
+            output: z.string().describe('Expected output for this input'),
+          }),
+        )
+        .min(1)
+        .optional()
+        .describe(
+          'The full list of sample test cases (replaces all existing test cases)',
+        ),
+      executionTimeLimit: z
+        .number()
+        .optional()
+        .describe('Execution time limit in seconds'),
+      executionMemoryLimit: z
+        .number()
+        .optional()
+        .describe('Execution memory limit in MB'),
+      samplesCount: z
+        .number()
+        .optional()
+        .describe('Number of generated samples used for grading'),
+      templates: z
+        .array(
+          z.object({
+            language: z
+              .string()
+              .describe('Language identifier, e.g. "javascript", "python3"'),
+            header: z
+              .string()
+              .optional()
+              .describe('Read-only code shown before the editable stub'),
+            code: z.string().optional().describe('Editable code stub'),
+            footer: z
+              .string()
+              .optional()
+              .describe('Read-only code shown after the editable stub'),
+          }),
+        )
+        .optional()
+        .describe(
+          'The full list of per-language code templates (replaces all existing templates)',
+        ),
+      points: z
+        .number()
+        .optional()
+        .describe('Points awarded for completing the step'),
+    },
+  },
+  async ({
+    stepId,
+    position,
+    question,
+    checkerCode,
+    testCases,
+    executionTimeLimit,
+    executionMemoryLimit,
+    samplesCount,
+    templates,
+    points,
+  }) => {
+    const step = await updateCodeStep({
+      stepId,
+      position,
+      question,
+      checkerCode,
+      testCases,
+      executionTimeLimit,
+      executionMemoryLimit,
+      samplesCount,
+      templates,
+      points,
+    });
+    return {
+      content: [
+        {
+          text: `Programming task ${step.id} updated (position ${step.position} in lesson ${step.lesson})`,
           type: 'text',
         },
       ],

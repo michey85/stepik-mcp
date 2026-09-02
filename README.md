@@ -50,7 +50,7 @@ npm run build
 ```env
 STEPIK_CLIENT_ID="..."
 STEPIK_CLIENT_SECRET="..."
-STEPIK_COURSES='[{"id":114197,"title":"React"},{"id":114165,"title":"Фундаментальный JavaScript"}]'
+STEPIK_COURSES='[{"id":123456,"title":"Course title"},{"id":234567,"title":"Another course"}]'
 ```
 
 Путь к `.env.local` в [src/index.ts](src/index.ts) вычисляется относительно расположения проекта, так что файл достаточно положить в корень репозитория — переносить его при установке в другое место не нужно.

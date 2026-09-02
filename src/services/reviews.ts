@@ -1,6 +1,6 @@
-const REVIEWS_URL =
-  'https://stepik.org/api/course-reviews?author=167596167&score=5';
-const BEST_IN_IT = 257879;
+import { getCurrentUserId } from './auth.js';
+
+const REVIEWS_URL = 'https://stepik.org/api/course-reviews';
 
 export interface Response {
   meta: Meta;
@@ -33,14 +33,26 @@ export interface Review {
   vote: any;
 }
 
-export async function getReviews(page = 1): Promise<Review[]> {
-  const response = await fetch(`${REVIEWS_URL}&page=${page}`);
+export async function getReviews(page = 1, score?: number): Promise<Review[]> {
+  const authorId = await getCurrentUserId();
+  const scoreParam = score !== undefined ? `&score=${score}` : '';
+  const response = await fetch(
+    `${REVIEWS_URL}?author=${authorId}${scoreParam}&page=${page}`,
+  );
   const data: Response = await response.json();
   return data['course-reviews'];
 }
 
-export async function getReviewsByCourse(courseId: number, page = 1): Promise<Review[]> {
-  const response = await fetch(`${REVIEWS_URL}&course=${courseId}&page=${page}`);
+export async function getReviewsByCourse(
+  courseId: number,
+  page = 1,
+  score?: number,
+): Promise<Review[]> {
+  const authorId = await getCurrentUserId();
+  const scoreParam = score !== undefined ? `&score=${score}` : '';
+  const response = await fetch(
+    `${REVIEWS_URL}?author=${authorId}${scoreParam}&course=${courseId}&page=${page}`,
+  );
   const data: Response = await response.json();
   return data['course-reviews'];
 }

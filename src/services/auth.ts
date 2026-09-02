@@ -42,3 +42,40 @@ export const getAccessToken = async (): Promise<string> => {
 
   return accessToken;
 };
+
+type StepicsResponse = {
+  stepics: { id: number; user: number }[];
+};
+
+let cachedUserId: number | undefined;
+
+export const getCurrentUserId = async (): Promise<number> => {
+  if (cachedUserId !== undefined) {
+    return cachedUserId;
+  }
+
+  const accessToken = await getAccessToken();
+  const response = await fetch("https://stepik.org/api/stepics/1", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    logger.error("Failed to get current user id", {
+      status: response.status,
+      statusText: response.statusText,
+    });
+    throw new Error(`Failed to get current user id: ${response.status} ${response.statusText}`);
+  }
+
+  const data: StepicsResponse = await response.json();
+  const userId = data.stepics[0]?.user;
+  if (!userId) {
+    logger.error("User id not found in stepics response", { responseData: data });
+    throw new Error("User id not found in stepics response");
+  }
+
+  cachedUserId = userId;
+  return userId;
+};

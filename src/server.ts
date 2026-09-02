@@ -113,8 +113,7 @@ server.registerTool(
 server.registerTool(
   'getCorsesReviews',
   {
-    description:
-      'Get the list of 5 starts review from all my courses, paginated',
+    description: 'Get the list of reviews from all my courses, paginated',
     inputSchema: {
       page: z
         .number()
@@ -122,13 +121,17 @@ server.registerTool(
         .describe(
           'page query param for pagination (default: 1), 20 reviews per page',
         ),
+      score: z
+        .number()
+        .optional()
+        .describe('Filter by review score (1-5). Omit to get all scores'),
     },
   },
-  async ({ page }) => {
-    const reviews = await getReviews(page);
+  async ({ page, score }) => {
+    const reviews = await getReviews(page, score);
     return {
       content: reviews.map((r) => ({
-        text: r.text,
+        text: `${r.text}, score: ${r.score}, course: ${r.course}, user: ${r.user}, date: ${r.create_date}`,
         type: 'text',
       })),
     };
@@ -164,13 +167,17 @@ server.registerTool(
         .describe(
           'page query param for pagination (default: 1), 20 reviews per page',
         ),
+      score: z
+        .number()
+        .optional()
+        .describe('Filter by review score (1-5). Omit to get all scores'),
     },
   },
-  async ({ courseId, page }) => {
-    const reviews = await getReviewsByCourse(courseId, page);
+  async ({ courseId, page, score }) => {
+    const reviews = await getReviewsByCourse(courseId, page, score);
     return {
       content: reviews.map((r) => ({
-        text: r.text,
+        text: `${r.text}, score: ${r.score}, user: ${r.user}, date: ${r.create_date}`,
         type: 'text',
       })),
     };
@@ -277,8 +284,11 @@ server.registerTool(
     },
   },
   async ({ courseId, page }) => {
-    const { promoCodes, hasNext, page: currentPage } =
-      await getActivePromoCodesByCourse(courseId, page);
+    const {
+      promoCodes,
+      hasNext,
+      page: currentPage,
+    } = await getActivePromoCodesByCourse(courseId, page);
     const summary = `Page ${currentPage}, ${promoCodes.length} active promo code(s). hasNext: ${hasNext}${hasNext ? ` (call again with page: ${currentPage + 1} for more)` : ''}`;
     return {
       content: [

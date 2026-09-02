@@ -44,10 +44,16 @@ function isActive(promoCode: PromoCode): boolean {
   return true;
 }
 
+export interface ActivePromoCodesPage {
+  promoCodes: PromoCode[];
+  hasNext: boolean;
+  page: number;
+}
+
 export async function getActivePromoCodesByCourse(
   courseId: number,
   page = 1,
-): Promise<PromoCode[]> {
+): Promise<ActivePromoCodesPage> {
   const accessToken = await getAccessToken();
 
   const response = await fetch(
@@ -65,7 +71,11 @@ export async function getActivePromoCodesByCourse(
   }
 
   const data: PromoCodesResponse = await response.json();
-  return data['promo-codes'].filter(isActive);
+  return {
+    promoCodes: data['promo-codes'].filter(isActive),
+    hasNext: data.meta.has_next,
+    page: data.meta.page,
+  };
 }
 
 export interface CreatePromoCodeParams {

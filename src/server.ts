@@ -265,7 +265,9 @@ server.registerTool(
   'getActivePromoCodesByCourse',
   {
     description:
-      'Get the list of currently active promo codes for a specific course. Paginated. Request all pages to get active promo codes for a course.',
+      'Get the list of currently active promo codes for a specific course. Paginated. ' +
+      'The response includes a "hasNext" flag and the current "page" number: ' +
+      'if hasNext is true, call this tool again with page + 1 to get the next page.',
     inputSchema: {
       courseId: z.number().describe('The ID of the course'),
       page: z
@@ -275,12 +277,17 @@ server.registerTool(
     },
   },
   async ({ courseId, page }) => {
-    const promoCodes = await getActivePromoCodesByCourse(courseId, page);
+    const { promoCodes, hasNext, page: currentPage } =
+      await getActivePromoCodesByCourse(courseId, page);
+    const summary = `Page ${currentPage}, ${promoCodes.length} active promo code(s). hasNext: ${hasNext}${hasNext ? ` (call again with page: ${currentPage + 1} for more)` : ''}`;
     return {
-      content: promoCodes.map((p) => ({
-        text: `${p.id}: ${p.name} - discount ${p.discount}${p.is_percent_discount ? '%' : ''}${p.expire_date ? `, expires ${p.expire_date}` : ''}`,
-        type: 'text',
-      })),
+      content: [
+        { text: summary, type: 'text' },
+        ...promoCodes.map((p) => ({
+          text: `${p.id}: ${p.name} - discount ${p.discount}${p.is_percent_discount ? '%' : ''}${p.expire_date ? `, expires ${p.expire_date}` : ''}`,
+          type: 'text' as const,
+        })),
+      ],
     };
   },
 );

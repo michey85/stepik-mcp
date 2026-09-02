@@ -4,7 +4,9 @@
   "description": "An MCP server for Stepik API",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "bin": {
     "stepik": "./build/index.js"
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
+    "prettier": "^3.9.6",
     "typescript": "^7.0.2"
   }
 }

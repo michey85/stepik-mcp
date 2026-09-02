@@ -84,7 +84,9 @@ export async function getSteps(stepIds: number[]): Promise<Step[]> {
   return data.steps;
 }
 
-export async function getStepContent(stepId: number): Promise<LessonContent['steps'][number]> {
+export async function getStepContent(
+  stepId: number,
+): Promise<LessonContent['steps'][number]> {
   const steps = await getSteps([stepId]);
   const step = steps[0];
   if (!step) {

@@ -11,6 +11,10 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
-  "include": ["src/**/*", "node_modules/@modelcontextprotocol/sdk/server/mcp.d.ts", "node_modules/@modelcontextprotocol/sdk/server/stdio.d.ts"],
+  "include": [
+    "src/**/*",
+    "node_modules/@modelcontextprotocol/sdk/server/mcp.d.ts",
+    "node_modules/@modelcontextprotocol/sdk/server/stdio.d.ts"
+  ],
   "exclude": ["node_modules"]
 }

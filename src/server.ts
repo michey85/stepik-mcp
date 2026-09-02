@@ -1,11 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { convertToMessage, getCourseBenefits } from './services/money.js';
-import {
-  getCommentById,
-  getUnansweredQuestionsFromBestInItCourse,
-  postCommentReply,
-} from './services/comments.js';
+import { getCommentById, postCommentReply } from './services/comments.js';
 import { getReviews, getReviewsByCourse } from './services/reviews.js';
 import { getNotifications } from './services/notifications.js';
 import { getLessonContent, getStepContent } from './services/lessons.js';
@@ -45,23 +41,6 @@ server.registerTool(
 
     return {
       content: [{ text: message, type: 'text' }],
-    };
-  },
-);
-
-server.registerTool(
-  'getUnansweredQuestionsFromBestInItCourse',
-  {
-    description: 'Get unanswered questions from the Best in IT course',
-    inputSchema: {},
-  },
-  async () => {
-    const unanswered = await getUnansweredQuestionsFromBestInItCourse();
-    return {
-      content: unanswered.map((q) => ({
-        text: `${q.text} with URL: ${q.discussion_url}`,
-        type: 'text',
-      })),
     };
   },
 );

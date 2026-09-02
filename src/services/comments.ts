@@ -122,58 +122,6 @@ interface UnansweredQuestion {
   discussion_url: string;
 }
 
-export async function getUnansweredQuestionsFromBestInItCourse(): Promise<
-  UnansweredQuestion[]
-> {
-  const accessToken = await getAccessToken();
-
-  const response = await fetch(BASE_URL, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: 'application/json',
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  const data: CourseDiscussions = await response.json();
-
-  const queryParams = data['discussion-proxies'][0].discussions_recent_activity
-    .map((comment) => `ids%5B%5D=${comment}`)
-    .join('&');
-
-  const response2 = await fetch(`${COMMENTS_URL}?${queryParams}`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: 'application/json',
-    },
-  });
-
-  if (!response2.ok) {
-    throw new Error(`HTTP error! status: ${response2.status}`);
-  }
-
-  const data2: CommentsObject = await response2.json();
-  const comments = data2.comments;
-
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).getTime();
-
-  const unanswered = comments.filter((c) => {
-    if (c.is_deleted || c.is_banned) return false;
-    if (c.parent !== null) return false;
-    return new Date(c.time).getTime() >= since;
-  });
-
-  return unanswered.map((c) => ({
-    text: toPlain(c.text || '').slice(0, 600),
-    author_id: c.user,
-    created_at: c.time,
-    discussion_url: `https://stepik.org/lesson/2246724/step/2?discussion=${c.id}`,
-  }));
-}
-
 export async function getCommentById(commentId: number): Promise<Comment> {
   const accessToken = await getAccessToken();
 

@@ -24,7 +24,7 @@ import {
   updateCertificatePoints,
 } from './services/certificates.js';
 import { toPlain } from './helpers/html.js';
-import { COURSES, COURSES_URI } from './resources/courses.js';
+import { COURSES } from './constants/courses.js';
 
 const server = new McpServer({
   name: 'stepik-mcp',
@@ -767,25 +767,6 @@ server.registerTool(
       ],
     };
   },
-);
-
-server.registerResource(
-  'list-of-my-courses',
-  COURSES_URI,
-  {
-    title: 'List of My Courses',
-    description: 'List of my Stepik courses',
-    mimeType: 'application/json',
-  },
-  async (uri) => ({
-    contents: [
-      {
-        uri: uri.href,
-        mimeType: 'application/json',
-        text: JSON.stringify(COURSES),
-      },
-    ],
-  }),
 );
 
 export default server;

@@ -12,14 +12,17 @@ import {
 import {
   createChoiceStep,
   createCodeStep,
+  createHtmlCssStep,
   updateChoiceStep,
   updateCodeStep,
+  updateHtmlCssStep,
 } from './services/stepSources.js';
 import {
   getCertificatePoints,
   updateCertificatePoints,
 } from './services/certificates.js';
 import { toPlain } from './helpers/html.js';
+import { htmlCssChecklistItemSchema } from './helpers/htmlCssTask.js';
 import { loadCourses } from './constants/courses.js';
 
 const server = new McpServer({
@@ -702,6 +705,127 @@ server.registerTool(
       content: [
         {
           text: `Programming task ${step.id} updated (position ${step.position} in lesson ${step.lesson})`,
+          type: 'text',
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
+  'addHtmlCssTask',
+  {
+    description:
+      'Add a new "Задача на HTML и CSS" (interactive HTML/CSS layout exercise) step to a Stepik lesson. ' +
+      "Checks run client-side in the browser against the student's HTML/CSS, driven by a checklist of DOM-selector-based tests.",
+    inputSchema: {
+      lessonId: z.number().describe('The ID of the lesson'),
+      position: z.number().describe('Position of the step within the lesson'),
+      question: z.string().describe('The task statement (HTML allowed)'),
+      htmlTemplate: z
+        .string()
+        .describe('Starting HTML shown to the student in the editor'),
+      cssTemplate: z
+        .string()
+        .optional()
+        .describe('Starting CSS shown to the student in the editor'),
+      checklist: z
+        .array(htmlCssChecklistItemSchema)
+        .min(1)
+        .describe('The checklist of sub-tasks the student must complete'),
+      points: z
+        .number()
+        .optional()
+        .describe('Points awarded for completing the step (default: 1)'),
+    },
+  },
+  async ({
+    lessonId,
+    position,
+    question,
+    htmlTemplate,
+    cssTemplate,
+    checklist,
+    points,
+  }) => {
+    const step = await createHtmlCssStep({
+      lessonId,
+      position,
+      question,
+      htmlTemplate,
+      cssTemplate,
+      checklist,
+      points,
+    });
+    return {
+      content: [
+        {
+          text: `HTML/CSS task created with id ${step.id} at position ${step.position} in lesson ${step.lesson}`,
+          type: 'text',
+        },
+      ],
+    };
+  },
+);
+
+server.registerTool(
+  'updateHtmlCssTask',
+  {
+    description:
+      'Update an existing "Задача на HTML и CSS" step. Only the provided fields are changed; everything else is left as-is.',
+    inputSchema: {
+      stepId: z.number().describe('The ID of the HTML/CSS task step to update'),
+      position: z
+        .number()
+        .optional()
+        .describe('New position of the step within the lesson'),
+      question: z
+        .string()
+        .optional()
+        .describe('The task statement (HTML allowed)'),
+      htmlTemplate: z
+        .string()
+        .optional()
+        .describe('Starting HTML shown to the student in the editor'),
+      cssTemplate: z
+        .string()
+        .optional()
+        .describe('Starting CSS shown to the student in the editor'),
+      checklist: z
+        .array(htmlCssChecklistItemSchema)
+        .min(1)
+        .optional()
+        .describe(
+          'The full checklist of sub-tasks (replaces the existing checklist)',
+        ),
+      points: z
+        .number()
+        .optional()
+        .describe('Points awarded for completing the step'),
+    },
+  },
+  async ({
+    stepId,
+    position,
+    question,
+    htmlTemplate,
+    cssTemplate,
+    checklist,
+    points,
+  }) => {
+    const step = await updateHtmlCssStep({
+      stepId,
+      position,
+      question,
+      htmlTemplate,
+      cssTemplate,
+      checklist,
+      points,
+    });
+    return {
+      content: [
+        {
+          text: `HTML/CSS task ${step.id} updated (position ${step.position} in lesson ${step.lesson})`,
           type: 'text',
         },
       ],

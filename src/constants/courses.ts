@@ -4,7 +4,7 @@ export interface StepikCourse {
   isPackage?: boolean;
 }
 
-function loadCourses(): readonly StepikCourse[] {
+export function loadCourses(): readonly StepikCourse[] {
   const raw = process.env.STEPIK_COURSES;
   if (!raw) {
     return [];
@@ -23,8 +23,6 @@ function loadCourses(): readonly StepikCourse[] {
   }
 }
 
-export const COURSES: readonly StepikCourse[] = loadCourses();
-
 export const courseNames: { [key: string]: string } = Object.fromEntries(
-  COURSES.map((c) => [c.id, c.title]),
+  loadCourses().map((c) => [c.id, c.title]),
 );

@@ -24,7 +24,7 @@ import {
   updateCertificatePoints,
 } from './services/certificates.js';
 import { toPlain } from './helpers/html.js';
-import { COURSES } from './constants/courses.js';
+import { loadCourses } from './constants/courses.js';
 
 const server = new McpServer({
   name: 'stepik-mcp',
@@ -142,7 +142,7 @@ server.registerTool(
     inputSchema: {},
   },
   async () => {
-    const courses = COURSES;
+    const courses = loadCourses();
     return {
       content: courses.map((c) => ({
         text: `${c.id}: ${c.title}`,
@@ -191,10 +191,11 @@ server.registerTool(
   },
   async ({ page, isUnread }) => {
     const notifications = await getNotifications(page, isUnread);
+    const courses = loadCourses();
     return {
       content: notifications.map((n) => {
         const courseNames = (n.courses || [])
-          .map((id) => COURSES.find((c) => c.id === id)?.title)
+          .map((id) => courses.find((c) => c.id === id)?.title)
           .filter(Boolean);
         const coursePrefix =
           courseNames.length > 0 ? `[${courseNames.join(', ')}] ` : '';
@@ -609,7 +610,9 @@ server.registerTool(
     description:
       'Update an existing programming (code challenge) step. Only the provided fields are changed; everything else is left as-is.',
     inputSchema: {
-      stepId: z.number().describe('The ID of the programming task step to update'),
+      stepId: z
+        .number()
+        .describe('The ID of the programming task step to update'),
       position: z
         .number()
         .optional()

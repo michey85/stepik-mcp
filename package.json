@@ -1,6 +1,6 @@
 {
   "name": "stepik-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An MCP server for Stepik API",
   "main": "index.js",
   "scripts": {

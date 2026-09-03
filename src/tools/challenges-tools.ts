@@ -18,10 +18,16 @@ export default function registerChallengesTools(server: McpServer) {
       inputSchema: {
         lessonId: z.number().describe('The ID of the lesson'),
         position: z.number().describe('Position of the step within the lesson'),
-        question: z.string().describe('The task statement (HTML allowed, do not HTML-escape angle brackets)'),
+        question: z
+          .string()
+          .describe(
+            'The task statement (HTML allowed, do not HTML-escape angle brackets)',
+          ),
         htmlTemplate: z
           .string()
-          .describe('Starting HTML shown to the student in the editor. Provide raw HTML/text; do not HTML-escape angle brackets.'),
+          .describe(
+            'Starting HTML shown to the student in the editor. Provide raw HTML/text; do not HTML-escape angle brackets.',
+          ),
         cssTemplate: z
           .string()
           .optional()
@@ -81,11 +87,15 @@ export default function registerChallengesTools(server: McpServer) {
         question: z
           .string()
           .optional()
-          .describe('The task statement (HTML allowed, do not HTML-escape angle brackets)'),
+          .describe(
+            'The task statement (HTML allowed, do not HTML-escape angle brackets)',
+          ),
         htmlTemplate: z
           .string()
           .optional()
-          .describe('Starting HTML shown to the student in the editor. Provide raw HTML/text; do not HTML-escape angle brackets.'),
+          .describe(
+            'Starting HTML shown to the student in the editor. Provide raw HTML/text; do not HTML-escape angle brackets.',
+          ),
         cssTemplate: z
           .string()
           .optional()
@@ -140,7 +150,11 @@ export default function registerChallengesTools(server: McpServer) {
       inputSchema: {
         lessonId: z.number().describe('The ID of the lesson'),
         position: z.number().describe('Position of the step within the lesson'),
-        question: z.string().describe('The task statement (HTML allowed, do not HTML-escape angle brackets)'),
+        question: z
+          .string()
+          .describe(
+            'The task statement (HTML allowed, do not HTML-escape angle brackets)',
+          ),
         checkerCode: z
           .string()
           .describe(
@@ -245,7 +259,9 @@ export default function registerChallengesTools(server: McpServer) {
         question: z
           .string()
           .optional()
-          .describe('The task statement (HTML allowed, do not HTML-escape angle brackets)'),
+          .describe(
+            'The task statement (HTML allowed, do not HTML-escape angle brackets)',
+          ),
         checkerCode: z
           .string()
           .optional()

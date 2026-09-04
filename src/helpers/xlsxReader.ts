@@ -102,7 +102,7 @@ function columnToIndex(column: string): number {
 function parseWorksheetRows(xml: string, sharedStrings: string[]): string[][] {
   const rows: string[][] = [];
   const rowRegex = /<row[^>]*>([\s\S]*?)<\/row>/g;
-  const cellRegex = /<c r="([A-Z]+)\d+"([^>]*)>([\s\S]*?)<\/c>/g;
+  const cellRegex = /<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;
 
   let rowMatch: RegExpExecArray | null;
   while ((rowMatch = rowRegex.exec(xml))) {
@@ -110,7 +110,9 @@ function parseWorksheetRows(xml: string, sharedStrings: string[]): string[][] {
     cellRegex.lastIndex = 0;
     let cellMatch: RegExpExecArray | null;
     while ((cellMatch = cellRegex.exec(rowMatch[1]))) {
-      const [, column, attrs, content] = cellMatch;
+      const [, attrs, content = ''] = cellMatch;
+      const columnMatch = /\br="([A-Z]+)\d+"/.exec(attrs);
+      if (!columnMatch) continue;
       const isSharedString = /\bt="s"/.test(attrs);
       const valueMatch = /<v>([\s\S]*?)<\/v>/.exec(content);
       let value = '';
@@ -119,7 +121,7 @@ function parseWorksheetRows(xml: string, sharedStrings: string[]): string[][] {
           ? (sharedStrings[Number(valueMatch[1])] ?? '')
           : decodeXmlEntities(valueMatch[1]);
       }
-      cells[columnToIndex(column)] = value;
+      cells[columnToIndex(columnMatch[1])] = value;
     }
     rows.push(cells);
   }

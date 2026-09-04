@@ -28,10 +28,10 @@ interface CoursePeriodStatisticsResponse {
   'course-period-statistics': CoursePeriodStatistics[];
 }
 
-export async function getCoursePeriodStatistics(
+async function fetchCoursePeriodStatisticsPage(
   courseId: number,
-  page = 1,
-): Promise<CoursePeriodStatistics[]> {
+  page: number,
+): Promise<CoursePeriodStatisticsResponse> {
   const accessToken = await getAccessToken();
   const response = await fetch(`${STATS_URL}?course=${courseId}&page=${page}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -48,18 +48,32 @@ export async function getCoursePeriodStatistics(
     );
   }
 
-  const data: CoursePeriodStatisticsResponse = await response.json();
+  return response.json();
+}
+
+export async function getCoursePeriodStatistics(
+  courseId: number,
+  page = 1,
+): Promise<CoursePeriodStatistics[]> {
+  const data = await fetchCoursePeriodStatisticsPage(courseId, page);
   return data['course-period-statistics'];
 }
 
 async function getLatestCoursePeriodStatistics(
   courseId: number,
+  maxPages = 5,
 ): Promise<CoursePeriodStatistics | undefined> {
-  const periods = await getCoursePeriodStatistics(courseId, 1);
-  return periods.reduce<CoursePeriodStatistics | undefined>((latest, p) => {
-    if (!latest || new Date(p.to_date) > new Date(latest.to_date)) return p;
-    return latest;
-  }, undefined);
+  let latest: CoursePeriodStatistics | undefined;
+  for (let page = 1; page <= maxPages; page++) {
+    const data = await fetchCoursePeriodStatisticsPage(courseId, page);
+    for (const p of data['course-period-statistics']) {
+      if (!latest || new Date(p.to_date) > new Date(latest.to_date)) {
+        latest = p;
+      }
+    }
+    if (!data.meta.has_next) break;
+  }
+  return latest;
 }
 
 async function findCoursePeriodStatisticsByDate(
@@ -141,16 +155,20 @@ export async function getCourseEngagementSummaries(
   courseIds: number[],
   fromDate?: string,
 ): Promise<CourseEngagementSummary[]> {
+  const outcomes = await Promise.allSettled(
+    courseIds.map((courseId) => getCourseEngagementSummary(courseId, fromDate)),
+  );
+
   const results: CourseEngagementSummary[] = [];
-  for (const courseId of courseIds) {
-    try {
-      results.push(await getCourseEngagementSummary(courseId, fromDate));
-    } catch (error) {
+  outcomes.forEach((outcome, i) => {
+    if (outcome.status === 'fulfilled') {
+      results.push(outcome.value);
+    } else {
       logger.error('Skipping course engagement summary', {
-        courseId,
-        error: (error as Error).message,
+        courseId: courseIds[i],
+        error: (outcome.reason as Error).message,
       });
     }
-  }
+  });
   return results;
 }

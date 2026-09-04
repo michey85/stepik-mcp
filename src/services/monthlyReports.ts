@@ -111,6 +111,12 @@ export async function getMonthlyReportSummary(
   const byCourse = new Map<number, CourseReportSummary>();
   for (const row of rows) {
     const courseId = Number(row.course_id);
+    if (!Number.isFinite(courseId)) {
+      logger.error('Skipping benefits row with invalid course_id', {
+        row,
+      });
+      continue;
+    }
     const existing = byCourse.get(courseId) ?? {
       courseId,
       courseTitle: row.course_title,

@@ -12,6 +12,7 @@ import registerFillBlanksTools from './tools/fillblanks-tools.js';
 import registerContentTools from './tools/content-tools.js';
 import registerBenefitsTools from './tools/benefits-tools.js';
 import registerNotificationsTools from './tools/notifications-tools.js';
+import registerMonthlyReportTools from './tools/monthly-report-tools.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { name, version } = JSON.parse(
@@ -33,5 +34,6 @@ registerCertificateTools(server);
 registerChallengesTools(server);
 registerQuizTools(server);
 registerFillBlanksTools(server);
+registerMonthlyReportTools(server);
 
 export default server;

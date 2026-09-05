@@ -1,4 +1,5 @@
 import { getAccessToken } from './auth.js';
+import { fetchAllByIds } from './stepikApi.js';
 
 const UNITS_URL = 'https://stepik.org/api/units';
 
@@ -27,26 +28,7 @@ export interface UpdateUnitParams {
 }
 
 export async function getUnits(unitIds: number[]): Promise<Unit[]> {
-  if (unitIds.length === 0) return [];
-
-  const accessToken = await getAccessToken();
-  const queryParams = unitIds.map((id) => `ids[]=${id}`).join('&');
-
-  const response = await fetch(`${UNITS_URL}?${queryParams}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `HTTP error! status: ${response.status} ${await response.text()}`,
-    );
-  }
-
-  const data: UnitsResponse = await response.json();
-  return data.units;
+  return fetchAllByIds<'units', Unit>(UNITS_URL, 'units', unitIds);
 }
 
 async function fetchUnit(unitId: number): Promise<Unit> {

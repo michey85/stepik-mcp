@@ -1,4 +1,5 @@
 import { getAccessToken } from './auth.js';
+import { fetchAllByIds } from './stepikApi.js';
 
 const SECTIONS_URL = 'https://stepik.org/api/sections';
 
@@ -20,26 +21,11 @@ interface SectionsResponse {
 }
 
 export async function getSections(sectionIds: number[]): Promise<Section[]> {
-  if (sectionIds.length === 0) return [];
-
-  const accessToken = await getAccessToken();
-  const queryParams = sectionIds.map((id) => `ids[]=${id}`).join('&');
-
-  const response = await fetch(`${SECTIONS_URL}?${queryParams}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `HTTP error! status: ${response.status} ${await response.text()}`,
-    );
-  }
-
-  const data: SectionsResponse = await response.json();
-  return data.sections;
+  return fetchAllByIds<'sections', Section>(
+    SECTIONS_URL,
+    'sections',
+    sectionIds,
+  );
 }
 
 export interface CreateSectionParams {

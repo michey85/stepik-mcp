@@ -1,5 +1,6 @@
 import { getAccessToken } from './auth.js';
 import { toPlain } from '../helpers/html.js';
+import { fetchAllByIds } from './stepikApi.js';
 
 const LESSONS_URL = 'https://stepik.org/api/lessons';
 const STEPS_URL = 'https://stepik.org/api/steps';
@@ -81,26 +82,7 @@ export async function getLesson(lessonId: number): Promise<Lesson> {
 }
 
 export async function getLessons(lessonIds: number[]): Promise<Lesson[]> {
-  if (lessonIds.length === 0) return [];
-
-  const accessToken = await getAccessToken();
-  const queryParams = lessonIds.map((id) => `ids[]=${id}`).join('&');
-
-  const response = await fetch(`${LESSONS_URL}?${queryParams}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `HTTP error! status: ${response.status} ${await response.text()}`,
-    );
-  }
-
-  const data: LessonsResponse = await response.json();
-  return data.lessons;
+  return fetchAllByIds<'lessons', Lesson>(LESSONS_URL, 'lessons', lessonIds);
 }
 
 export async function createLesson(

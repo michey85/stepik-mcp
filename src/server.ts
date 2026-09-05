@@ -12,7 +12,6 @@ import registerFillBlanksTools from './tools/fillblanks-tools.js';
 import registerContentTools from './tools/content-tools.js';
 import registerBenefitsTools from './tools/benefits-tools.js';
 import registerNotificationsTools from './tools/notifications-tools.js';
-import registerCourseStructureTools from './tools/course-structure-tools.js';
 import registerMonthlyReportTools from './tools/monthly-report-tools.js';
 import registerPeriodStatisticsTools from './tools/period-statistics-tools.js';
 import registerCourseStructureTools from './tools/course-structure-tools.js';

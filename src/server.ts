@@ -39,6 +39,5 @@ registerFillBlanksTools(server);
 registerCourseStructureTools(server);
 registerMonthlyReportTools(server);
 registerPeriodStatisticsTools(server);
-registerCourseStructureTools(server);
 
 export default server;

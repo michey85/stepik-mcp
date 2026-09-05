@@ -1,5 +1,6 @@
 import { getAccessToken } from './auth.js';
 import { toPlain } from '../helpers/html.js';
+import { fetchAllByIds } from './stepikApi.js';
 
 const LESSONS_URL = 'https://stepik.org/api/lessons';
 const STEPS_URL = 'https://stepik.org/api/steps';
@@ -9,10 +10,25 @@ export interface Lesson {
   steps: number[];
   title: string;
   canonical_url: string;
+  language: string;
+  is_public: boolean;
 }
 
 interface LessonsResponse {
   lessons: Lesson[];
+}
+
+export interface CreateLessonParams {
+  title: string;
+  language?: string;
+  isPublic?: boolean;
+}
+
+export interface UpdateLessonParams {
+  lessonId: number;
+  title?: string;
+  language?: string;
+  isPublic?: boolean;
 }
 
 export interface Block {
@@ -63,6 +79,73 @@ export async function getLesson(lessonId: number): Promise<Lesson> {
     throw new Error(`Lesson ${lessonId} not found`);
   }
   return lesson;
+}
+
+export async function getLessons(lessonIds: number[]): Promise<Lesson[]> {
+  return fetchAllByIds<'lessons', Lesson>(LESSONS_URL, 'lessons', lessonIds);
+}
+
+export async function createLesson(
+  params: CreateLessonParams,
+): Promise<Lesson> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(LESSONS_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      lesson: {
+        title: params.title,
+        language: params.language ?? 'ru',
+        is_public: params.isPublic ?? true,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `HTTP error! status: ${response.status} ${await response.text()}`,
+    );
+  }
+
+  const data: LessonsResponse = await response.json();
+  return data.lessons[0];
+}
+
+export async function updateLesson(
+  params: UpdateLessonParams,
+): Promise<Lesson> {
+  const current = await getLesson(params.lessonId);
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`${LESSONS_URL}/${params.lessonId}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      lesson: {
+        title: params.title ?? current.title,
+        language: params.language ?? current.language,
+        is_public: params.isPublic ?? current.is_public,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `HTTP error! status: ${response.status} ${await response.text()}`,
+    );
+  }
+
+  const data: LessonsResponse = await response.json();
+  return data.lessons[0];
 }
 
 export async function getSteps(stepIds: number[]): Promise<Step[]> {

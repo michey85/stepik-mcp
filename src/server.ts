@@ -14,6 +14,7 @@ import registerBenefitsTools from './tools/benefits-tools.js';
 import registerNotificationsTools from './tools/notifications-tools.js';
 import registerMonthlyReportTools from './tools/monthly-report-tools.js';
 import registerPeriodStatisticsTools from './tools/period-statistics-tools.js';
+import registerCourseStructureTools from './tools/course-structure-tools.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { name, version } = JSON.parse(
@@ -35,6 +36,7 @@ registerCertificateTools(server);
 registerChallengesTools(server);
 registerQuizTools(server);
 registerFillBlanksTools(server);
+registerCourseStructureTools(server);
 registerMonthlyReportTools(server);
 registerPeriodStatisticsTools(server);
 

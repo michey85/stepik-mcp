@@ -12,6 +12,7 @@ import registerFillBlanksTools from './tools/fillblanks-tools.js';
 import registerContentTools from './tools/content-tools.js';
 import registerBenefitsTools from './tools/benefits-tools.js';
 import registerNotificationsTools from './tools/notifications-tools.js';
+import registerCourseStructureTools from './tools/course-structure-tools.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { name, version } = JSON.parse(
@@ -33,5 +34,6 @@ registerCertificateTools(server);
 registerChallengesTools(server);
 registerQuizTools(server);
 registerFillBlanksTools(server);
+registerCourseStructureTools(server);
 
 export default server;

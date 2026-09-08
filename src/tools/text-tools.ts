@@ -10,9 +10,7 @@ export default function registerTextTools(server: McpServer) {
         'Add a new "text" (theory) step to a Stepik lesson. Text steps just display HTML content and are not graded.',
       inputSchema: {
         lessonId: z.number().describe('The ID of the lesson'),
-        position: z
-          .number()
-          .describe('Position of the step within the lesson'),
+        position: z.number().describe('Position of the step within the lesson'),
         text: z.string().describe('The HTML content of the step'),
       },
     },

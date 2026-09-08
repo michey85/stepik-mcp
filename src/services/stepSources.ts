@@ -98,6 +98,18 @@ export interface UpdateHtmlCssStepParams {
   points?: number;
 }
 
+export interface CreateTextStepParams {
+  lessonId: number;
+  position: number;
+  text: string;
+}
+
+export interface UpdateTextStepParams {
+  stepId: number;
+  position?: number;
+  text?: string;
+}
+
 export interface FillBlanksOption {
   text: string;
   isCorrect: boolean;
@@ -425,6 +437,75 @@ export async function updateHtmlCssStep(
               params.cssTemplate ?? current.block.source.css_template,
             checklist: params.checklist ?? current.block.source.checklist,
           },
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `HTTP error! status: ${response.status} ${await response.text()}`,
+    );
+  }
+
+  const data: StepSourcesResponse = await response.json();
+  return data['step-sources'][0];
+}
+
+export async function createTextStep(
+  params: CreateTextStepParams,
+): Promise<StepSource> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(STEP_SOURCES_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      stepSource: {
+        lesson: params.lessonId,
+        position: params.position,
+        block: {
+          name: 'text',
+          text: params.text,
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `HTTP error! status: ${response.status} ${await response.text()}`,
+    );
+  }
+
+  const data: StepSourcesResponse = await response.json();
+  return data['step-sources'][0];
+}
+
+export async function updateTextStep(
+  params: UpdateTextStepParams,
+): Promise<StepSource> {
+  const current = await fetchStepSource(params.stepId);
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`${STEP_SOURCES_URL}/${params.stepId}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      stepSource: {
+        lesson: current.lesson,
+        position: params.position ?? current.position,
+        block: {
+          name: 'text',
+          text: params.text ?? current.block.text,
         },
       },
     }),

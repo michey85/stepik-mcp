@@ -79,10 +79,11 @@ interface ReviewSummariesResponse {
 
 export async function getCourseReviewSummary(
   courseId: number,
+  accessToken?: string,
 ): Promise<CourseReviewSummary> {
-  const accessToken = await getAccessToken();
+  const token = accessToken ?? (await getAccessToken());
   const response = await fetch(`${REVIEW_SUMMARIES_URL}?course=${courseId}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!response.ok) {
@@ -110,8 +111,9 @@ export async function getCourseReviewSummary(
 export async function getAllCoursesReviewSummaries(
   courseIds: number[],
 ): Promise<CourseReviewSummary[]> {
+  const accessToken = await getAccessToken();
   const outcomes = await Promise.allSettled(
-    courseIds.map((courseId) => getCourseReviewSummary(courseId)),
+    courseIds.map((courseId) => getCourseReviewSummary(courseId, accessToken)),
   );
 
   const results: CourseReviewSummary[] = [];

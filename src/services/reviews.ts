@@ -1,6 +1,8 @@
-import { getCurrentUserId } from './auth.js';
+import { getAccessToken, getCurrentUserId } from './auth.js';
+import { logger } from '../logger.js';
 
 const REVIEWS_URL = 'https://stepik.org/api/course-reviews';
+const REVIEW_SUMMARIES_URL = 'https://stepik.org/api/course-review-summaries';
 
 export interface Response {
   meta: Meta;
@@ -55,4 +57,73 @@ export async function getReviewsByCourse(
   );
   const data: Response = await response.json();
   return data['course-reviews'];
+}
+
+export interface CourseReviewSummary {
+  courseId: number;
+  average: number;
+  count: number;
+  distribution: number[];
+}
+
+interface ReviewSummariesResponse {
+  meta: Meta;
+  'course-review-summaries': {
+    id: number;
+    course: number;
+    average: number;
+    count: number;
+    distribution: number[];
+  }[];
+}
+
+export async function getCourseReviewSummary(
+  courseId: number,
+): Promise<CourseReviewSummary> {
+  const accessToken = await getAccessToken();
+  const response = await fetch(`${REVIEW_SUMMARIES_URL}?course=${courseId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!response.ok) {
+    logger.error('Failed to fetch course review summary', {
+      status: response.status,
+      statusText: response.statusText,
+      courseId,
+    });
+    throw new Error(
+      `Failed to fetch course review summary: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const data: ReviewSummariesResponse = await response.json();
+  const summary = data['course-review-summaries'][0];
+
+  return {
+    courseId,
+    average: summary?.average ?? 0,
+    count: summary?.count ?? 0,
+    distribution: summary?.distribution ?? [0, 0, 0, 0, 0],
+  };
+}
+
+export async function getAllCoursesReviewSummaries(
+  courseIds: number[],
+): Promise<CourseReviewSummary[]> {
+  const outcomes = await Promise.allSettled(
+    courseIds.map((courseId) => getCourseReviewSummary(courseId)),
+  );
+
+  const results: CourseReviewSummary[] = [];
+  outcomes.forEach((outcome, i) => {
+    if (outcome.status === 'fulfilled') {
+      results.push(outcome.value);
+    } else {
+      logger.error('Skipping course review summary', {
+        courseId: courseIds[i],
+        error: (outcome.reason as Error).message,
+      });
+    }
+  });
+  return results;
 }

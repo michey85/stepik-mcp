@@ -1,3 +1,10 @@
+## [Unreleased]
+
+### Added
+
+- Получение описания курса (summary, description, requirements, workload)
+- Обновление описания курса
+
 ## [1.4.0]
 
 ### Added

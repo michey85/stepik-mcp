@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 import { z } from 'zod';
 import { getLessonContent, getStepContent } from '../services/lessons.js';
-import { getCourse } from '../services/courses.js';
+import { getCourse, updateCourseDescription } from '../services/courses.js';
 import { loadCourses } from '../constants/courses.js';
 
 export default function registerContentTools(server: McpServer) {
@@ -42,6 +42,40 @@ export default function registerContentTools(server: McpServer) {
               `Description:\n${course.description || '(none)'}\n\n` +
               `Requirements:\n${course.requirements || '(none)'}\n\n` +
               `Workload: ${course.workload || '(none)'}`,
+            type: 'text',
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerTool(
+    'updateCourseDescription',
+    {
+      description:
+        "Update a Stepik course's description, summary, requirements, and/or workload. Only the provided fields are changed; content should be HTML-formatted, as stored on Stepik.",
+      inputSchema: {
+        courseId: z.number().describe('The ID of the course'),
+        description: z.string().optional().describe('New description (HTML)'),
+        summary: z.string().optional().describe('New summary (HTML)'),
+        requirements: z.string().optional().describe('New requirements (HTML)'),
+        workload: z
+          .string()
+          .optional()
+          .describe('New workload, e.g. "3-5 часов"'),
+      },
+    },
+    async ({ courseId, description, summary, requirements, workload }) => {
+      const course = await updateCourseDescription(courseId, {
+        description,
+        summary,
+        requirements,
+        workload,
+      });
+      return {
+        content: [
+          {
+            text: `Course ${course.id} ("${course.title}") updated.`,
             type: 'text',
           },
         ],

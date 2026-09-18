@@ -6,6 +6,10 @@ export interface Course {
   id: number;
   title: string;
   sections: number[];
+  description: string;
+  summary: string;
+  requirements: string;
+  workload: string;
 }
 
 interface CoursesResponse {

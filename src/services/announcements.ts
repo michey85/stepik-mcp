@@ -97,6 +97,7 @@ export interface CreateAnnouncementParams {
   startDate?: string;
   mailPeriodDays?: number;
   mailQuantity?: number;
+  isInfinite?: boolean;
   isRestrictedByScore?: boolean;
   scorePercentMin?: number;
   scorePercentMax?: number;
@@ -118,6 +119,7 @@ export async function createAnnouncement(
         start_date: params.startDate,
         mail_period_days: params.mailPeriodDays ?? 7,
         mail_quantity: params.mailQuantity ?? 1,
+        is_infinite: params.isInfinite ?? false,
         is_restricted_by_score: params.isRestrictedByScore ?? false,
         score_percent_min: params.scorePercentMin ?? 0,
         score_percent_max: params.scorePercentMax ?? 100,
@@ -153,6 +155,7 @@ export async function updateAnnouncement(
         start_date: params.startDate ?? current.start_date,
         mail_period_days: params.mailPeriodDays ?? current.mail_period_days,
         mail_quantity: params.mailQuantity ?? current.mail_quantity,
+        is_infinite: params.isInfinite ?? current.is_infinite,
         is_restricted_by_score:
           params.isRestrictedByScore ?? current.is_restricted_by_score,
         score_percent_min: params.scorePercentMin ?? current.score_percent_min,

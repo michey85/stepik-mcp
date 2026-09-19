@@ -59,6 +59,10 @@ const announcementFields = {
     .number()
     .optional()
     .describe('Number of sends in a series (default: 1)'),
+  isInfinite: z
+    .boolean()
+    .optional()
+    .describe('Repeat the series indefinitely, ignoring mailQuantity'),
   isRestrictedByScore: z
     .boolean()
     .optional()

@@ -20,3 +20,7 @@ https://github.com/StepicOrg/Stepik-API - examples
 - `src/helpers/` - shared logic (e.g. HTML/CSS task building)
 - Config comes from `.env.local` (see `.env.example`): `STEPIK_CLIENT_ID`, `STEPIK_CLIENT_SECRET`, `STEPIK_COURSES` (JSON array of `{id, title, isPackage?}`)
 - Logs write to `logs/app.log` (`src/logger.ts`)
+
+## Conventions
+
+- `getAccessToken()` is not cached — it does a real OAuth request every call. In any function that makes several Stepik requests (pagination loops, batch fetches), call it once up front and pass the token down to the per-request helpers; never call it inside the loop.

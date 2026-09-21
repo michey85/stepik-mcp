@@ -12,7 +12,8 @@ export default function registerBenefitsTools(server: McpServer) {
       },
     },
     async ({ period = 24 }) => {
-      const benefits = await getCourseBenefits();
+      const since = new Date(Date.now() - period * 60 * 60 * 1000);
+      const benefits = await getCourseBenefits(since);
       const message = convertToMessage(benefits, period);
 
       return {

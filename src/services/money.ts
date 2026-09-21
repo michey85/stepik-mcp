@@ -2,9 +2,24 @@ import { courseNames } from '../constants/courses.js';
 import { getAccessToken } from './auth.js';
 import { logger } from '../logger.js';
 
-const BENEFITS_URL = 'https://stepik.org/api/course-benefits?page=1';
+const BENEFITS_URL = 'https://stepik.org/api/course-benefits';
+const MAX_PAGES = 50;
 
-export const convertToMessage = (benefits: any[], period = 24) => {
+export interface CourseBenefit {
+  id: number;
+  course: number;
+  time: string;
+  amount: string;
+  promo_code: string | null;
+  [key: string]: unknown;
+}
+
+interface CourseBenefitsResponse {
+  meta: { page: number; has_next: boolean; has_previous: boolean };
+  'course-benefits': CourseBenefit[];
+}
+
+export const convertToMessage = (benefits: CourseBenefit[], period = 24) => {
   // Граница: последние 24 часа от момента запуска
   const now = new Date();
   const since = new Date(now.getTime() - period * 60 * 60 * 1000);
@@ -69,10 +84,11 @@ export const convertToMessage = (benefits: any[], period = 24) => {
   return lines.join('\n');
 };
 
-export async function getCourseBenefits(): Promise<string[]> {
-  const accessToken = await getAccessToken();
-
-  const response = await fetch(BENEFITS_URL, {
+async function fetchBenefitsPage(
+  page: number,
+  accessToken: string,
+): Promise<CourseBenefitsResponse> {
+  const response = await fetch(`${BENEFITS_URL}?page=${page}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
@@ -82,13 +98,35 @@ export async function getCourseBenefits(): Promise<string[]> {
     logger.error('Failed to fetch course benefits', {
       status: response.status,
       statusText: response.statusText,
-      accessToken,
+      page,
     });
     throw new Error(
       `Failed to fetch course benefits: ${response.status} ${response.statusText}`,
     );
   }
 
-  const data = await response.json();
-  return data['course-benefits'] || [];
+  return response.json();
+}
+
+// Benefits come newest-first, so we walk pages until we hit an item older
+// than `since` (or run out of pages / hit the safety cap).
+export async function getCourseBenefits(
+  since?: Date,
+  maxPages = MAX_PAGES,
+): Promise<CourseBenefit[]> {
+  const accessToken = await getAccessToken();
+  const all: CourseBenefit[] = [];
+
+  for (let page = 1; page <= maxPages; page++) {
+    const data = await fetchBenefitsPage(page, accessToken);
+    const items = data['course-benefits'] || [];
+    all.push(...items);
+
+    if (items.length === 0 || !data.meta?.has_next) break;
+
+    const oldest = items[items.length - 1];
+    if (since && new Date(oldest.time) < since) break;
+  }
+
+  return all;
 }

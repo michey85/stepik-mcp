@@ -9,7 +9,15 @@ type TokenResponse = {
   scope: string;
 };
 
+const TOKEN_TTL_MS = 10 * 60 * 1000;
+
+let cachedToken: { value: string; expiresAt: number } | undefined;
+
 export const getAccessToken = async (): Promise<string> => {
+  if (cachedToken && Date.now() < cachedToken.expiresAt) {
+    return cachedToken.value;
+  }
+
   logger.info('Requesting Stepik access token', { url: BASE_URL });
 
   const response = await fetch(BASE_URL, {
@@ -42,6 +50,7 @@ export const getAccessToken = async (): Promise<string> => {
     throw new Error('Access token not found in response');
   }
 
+  cachedToken = { value: accessToken, expiresAt: Date.now() + TOKEN_TTL_MS };
   return accessToken;
 };
 

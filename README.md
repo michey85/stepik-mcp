@@ -4,6 +4,15 @@ MCP-сервер для работы с [Stepik API](https://stepik.org/api/docs
 
 Источник правды по эндпоинтам API — https://stepik.org/api/docs/, примеры запросов — https://github.com/StepicOrg/Stepik-API.
 
+## Оглавление
+
+- [Что умеет сервер](#что-умеет-сервер)
+- [Установка](#установка)
+- [Учётные данные автора](#учётные-данные-автора)
+- [Список курсов](#список-курсов)
+- [Настройка в Claude Desktop](#настройка-в-claude-desktop)
+- [Разработка](#разработка)
+
 ## Что умеет сервер
 
 Сервер реализован на TypeScript поверх `@modelcontextprotocol/sdk` и авторизуется в Stepik по OAuth2 (`client_credentials`).
@@ -63,7 +72,7 @@ MCP-сервер для работы с [Stepik API](https://stepik.org/api/docs
 ## Установка
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/michey85/stepik-mcp.git
 cd stepik-mcp
 npm install
 npm run build

@@ -23,4 +23,4 @@ https://github.com/StepicOrg/Stepik-API - examples
 
 ## Conventions
 
-- `getAccessToken()` is not cached — it does a real OAuth request every call. In any function that makes several Stepik requests (pagination loops, batch fetches), call it once up front and pass the token down to the per-request helpers; never call it inside the loop.
+- `getAccessToken()` caches the token in memory for 10 minutes; after that it does a real OAuth request. Still, in any function that makes several Stepik requests (pagination loops, batch fetches), call it once up front and pass the token down to the per-request helpers; never call it inside the loop.

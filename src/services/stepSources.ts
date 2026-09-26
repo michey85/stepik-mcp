@@ -759,6 +759,11 @@ export async function updateSortingStep(
   params: UpdateSortingStepParams,
 ): Promise<StepSource> {
   const current = await fetchStepSource(params.stepId);
+  if (current.block.name !== 'sorting') {
+    throw new Error(
+      `Step ${params.stepId} is a '${current.block.name}' step, not a sorting step`,
+    );
+  }
   const accessToken = await getAccessToken();
 
   const response = await fetch(`${STEP_SOURCES_URL}/${params.stepId}`, {

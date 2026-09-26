@@ -697,3 +697,104 @@ export async function updateChoiceStep(
   const data: StepSourcesResponse = await response.json();
   return data['step-sources'][0];
 }
+
+export interface CreateSortingStepParams {
+  lessonId: number;
+  position: number;
+  question: string;
+  options: string[];
+  isHtmlEnabled?: boolean;
+  points?: number;
+}
+
+export interface UpdateSortingStepParams {
+  stepId: number;
+  position?: number;
+  question?: string;
+  options?: string[];
+  isHtmlEnabled?: boolean;
+  points?: number;
+}
+
+export async function createSortingStep(
+  params: CreateSortingStepParams,
+): Promise<StepSource> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(STEP_SOURCES_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      stepSource: {
+        lesson: params.lessonId,
+        position: params.position,
+        cost: params.points ?? 1,
+        block: {
+          name: 'sorting',
+          text: params.question,
+          source: {
+            options: params.options.map((text) => ({ text })),
+            is_html_enabled: params.isHtmlEnabled ?? true,
+          },
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `HTTP error! status: ${response.status} ${await response.text()}`,
+    );
+  }
+
+  const data: StepSourcesResponse = await response.json();
+  return data['step-sources'][0];
+}
+
+export async function updateSortingStep(
+  params: UpdateSortingStepParams,
+): Promise<StepSource> {
+  const current = await fetchStepSource(params.stepId);
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`${STEP_SOURCES_URL}/${params.stepId}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      stepSource: {
+        lesson: current.lesson,
+        position: params.position ?? current.position,
+        cost: params.points ?? current.cost,
+        block: {
+          name: 'sorting',
+          text: params.question ?? current.block.text,
+          source: {
+            ...current.block.source,
+            options: params.options
+              ? params.options.map((text) => ({ text }))
+              : current.block.source.options,
+            is_html_enabled:
+              params.isHtmlEnabled ?? current.block.source.is_html_enabled,
+          },
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `HTTP error! status: ${response.status} ${await response.text()}`,
+    );
+  }
+
+  const data: StepSourcesResponse = await response.json();
+  return data['step-sources'][0];
+}

@@ -704,6 +704,8 @@ export interface CreateSortingStepParams {
   question: string;
   options: string[];
   isHtmlEnabled?: boolean;
+  feedbackCorrect?: string;
+  feedbackWrong?: string;
   points?: number;
 }
 
@@ -713,6 +715,8 @@ export interface UpdateSortingStepParams {
   question?: string;
   options?: string[];
   isHtmlEnabled?: boolean;
+  feedbackCorrect?: string;
+  feedbackWrong?: string;
   points?: number;
 }
 
@@ -740,6 +744,8 @@ export async function createSortingStep(
             options: params.options.map((text) => ({ text })),
             is_html_enabled: params.isHtmlEnabled ?? true,
           },
+          feedback_correct: params.feedbackCorrect,
+          feedback_wrong: params.feedbackWrong,
         },
       },
     }),
@@ -789,6 +795,9 @@ export async function updateSortingStep(
             is_html_enabled:
               params.isHtmlEnabled ?? current.block.source.is_html_enabled,
           },
+          feedback_correct:
+            params.feedbackCorrect ?? current.block.feedback_correct,
+          feedback_wrong: params.feedbackWrong ?? current.block.feedback_wrong,
         },
       },
     }),

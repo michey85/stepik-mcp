@@ -23,6 +23,16 @@ export default function registerSortingTools(server: McpServer) {
           .boolean()
           .optional()
           .describe('Whether item texts are rendered as HTML (default: true)'),
+        feedbackCorrect: z
+          .string()
+          .optional()
+          .describe('Optional hint shown when the items are sorted correctly'),
+        feedbackWrong: z
+          .string()
+          .optional()
+          .describe(
+            'Optional hint shown when the items are sorted incorrectly',
+          ),
         points: z
           .number()
           .optional()
@@ -35,6 +45,8 @@ export default function registerSortingTools(server: McpServer) {
       question,
       options,
       isHtmlEnabled,
+      feedbackCorrect,
+      feedbackWrong,
       points,
     }) => {
       const step = await createSortingStep({
@@ -43,6 +55,8 @@ export default function registerSortingTools(server: McpServer) {
         question,
         options,
         isHtmlEnabled,
+        feedbackCorrect,
+        feedbackWrong,
         points,
       });
       return {
@@ -82,19 +96,38 @@ export default function registerSortingTools(server: McpServer) {
           .boolean()
           .optional()
           .describe('Whether item texts are rendered as HTML'),
+        feedbackCorrect: z
+          .string()
+          .optional()
+          .describe('Hint shown when the items are sorted correctly'),
+        feedbackWrong: z
+          .string()
+          .optional()
+          .describe('Hint shown when the items are sorted incorrectly'),
         points: z
           .number()
           .optional()
           .describe('Points awarded for completing the step'),
       },
     },
-    async ({ stepId, position, question, options, isHtmlEnabled, points }) => {
+    async ({
+      stepId,
+      position,
+      question,
+      options,
+      isHtmlEnabled,
+      feedbackCorrect,
+      feedbackWrong,
+      points,
+    }) => {
       const step = await updateSortingStep({
         stepId,
         position,
         question,
         options,
         isHtmlEnabled,
+        feedbackCorrect,
+        feedbackWrong,
         points,
       });
       return {

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import {
   createSortingStep,
   updateSortingStep,
-} from '../services/stepSources.js';
+} from '../services/stepSources/sorting.js';
 
 export default function registerSortingTools(server: McpServer) {
   server.registerTool(

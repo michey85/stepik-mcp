@@ -1,6 +1,9 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 import { z } from 'zod';
-import { createTextStep, updateTextStep } from '../services/stepSources.js';
+import {
+  createTextStep,
+  updateTextStep,
+} from '../services/stepSources/text.js';
 
 export default function registerTextTools(server: McpServer) {
   server.registerTool(

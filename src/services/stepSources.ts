@@ -812,3 +812,162 @@ export async function updateSortingStep(
   const data: StepSourcesResponse = await response.json();
   return data['step-sources'][0];
 }
+
+export type GraderTaskType = 'javascript' | 'nodejs' | 'react';
+
+export interface GraderUploadFile {
+  label: string;
+  filename: string;
+}
+
+export interface CreateExternalGraderStepParams {
+  lessonId: number;
+  position: number;
+  question: string;
+  queueName: string;
+  taskType: GraderTaskType;
+  taskId: string;
+  language?: string;
+  template?: string;
+  files?: GraderUploadFile[];
+  points?: number;
+}
+
+export interface UpdateExternalGraderStepParams {
+  stepId: number;
+  position?: number;
+  question?: string;
+  queueName?: string;
+  taskType?: GraderTaskType;
+  taskId?: string;
+  language?: string;
+  template?: string;
+  files?: GraderUploadFile[];
+  points?: number;
+}
+
+function graderLanguage(taskType: GraderTaskType): string {
+  return taskType === 'react' ? 'react' : 'javascript';
+}
+
+// Editor mode: the student types code into a text field seeded with `template`.
+// Upload mode (non-empty `files`): the student uploads one file per entry.
+function buildSubmissionMode(
+  files: GraderUploadFile[] | undefined,
+  template: string | undefined,
+): Record<string, any> {
+  if (files && files.length > 0) {
+    return { is_text_enabled: false, files };
+  }
+  return { is_text_enabled: true, template: template ?? '' };
+}
+
+export async function createExternalGraderStep(
+  params: CreateExternalGraderStepParams,
+): Promise<StepSource> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(STEP_SOURCES_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      stepSource: {
+        lesson: params.lessonId,
+        position: params.position,
+        cost: params.points ?? 1,
+        block: {
+          name: 'external-grader',
+          text: params.question,
+          source: {
+            queue_name: params.queueName,
+            language: params.language ?? graderLanguage(params.taskType),
+            ...buildSubmissionMode(params.files, params.template),
+            grader_payload: {
+              task_type: params.taskType,
+              task_id: params.taskId,
+            },
+          },
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `HTTP error! status: ${response.status} ${await response.text()}`,
+    );
+  }
+
+  const data: StepSourcesResponse = await response.json();
+  return data['step-sources'][0];
+}
+
+export async function updateExternalGraderStep(
+  params: UpdateExternalGraderStepParams,
+): Promise<StepSource> {
+  const current = await fetchStepSource(params.stepId);
+  if (current.block.name !== 'external-grader') {
+    throw new Error(
+      `Step ${params.stepId} is a '${current.block.name}' step, not an external grader step`,
+    );
+  }
+  const accessToken = await getAccessToken();
+
+  const { template, files, ...currentSource } = current.block.source;
+  const currentPayload = currentSource.grader_payload ?? {};
+  const taskType = params.taskType ?? currentPayload.task_type;
+  const submissionMode =
+    params.files !== undefined
+      ? buildSubmissionMode(params.files, params.template ?? template)
+      : currentSource.is_text_enabled
+        ? { template: params.template ?? template ?? '' }
+        : { files };
+
+  const response = await fetch(`${STEP_SOURCES_URL}/${params.stepId}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      stepSource: {
+        lesson: current.lesson,
+        position: params.position ?? current.position,
+        cost: params.points ?? current.cost,
+        block: {
+          name: 'external-grader',
+          text: params.question ?? current.block.text,
+          source: {
+            ...currentSource,
+            queue_name: params.queueName ?? currentSource.queue_name,
+            language:
+              params.language ??
+              (params.taskType
+                ? graderLanguage(params.taskType)
+                : currentSource.language),
+            ...submissionMode,
+            grader_payload: {
+              ...currentPayload,
+              task_type: taskType,
+              task_id: params.taskId ?? currentPayload.task_id,
+            },
+          },
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `HTTP error! status: ${response.status} ${await response.text()}`,
+    );
+  }
+
+  const data: StepSourcesResponse = await response.json();
+  return data['step-sources'][0];
+}

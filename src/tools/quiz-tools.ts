@@ -1,6 +1,9 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 import { z } from 'zod';
-import { createChoiceStep, updateChoiceStep } from '../services/stepSources.js';
+import {
+  createChoiceStep,
+  updateChoiceStep,
+} from '../services/stepSources/choice.js';
 
 export default function registerQuizTools(server: McpServer) {
   server.registerTool(

@@ -2,10 +2,12 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 import { z } from 'zod';
 import {
   createCodeStep,
-  createHtmlCssStep,
   updateCodeStep,
+} from '../services/stepSources/code.js';
+import {
+  createHtmlCssStep,
   updateHtmlCssStep,
-} from '../services/stepSources.js';
+} from '../services/stepSources/htmlCss.js';
 import { htmlCssChecklistItemSchema } from '../helpers/htmlCssTask.js';
 
 export default function registerChallengesTools(server: McpServer) {

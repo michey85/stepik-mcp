@@ -3,7 +3,7 @@ import { z } from 'zod';
 import {
   createFillBlanksStep,
   updateFillBlanksStep,
-} from '../services/stepSources.js';
+} from '../services/stepSources/fillBlanks.js';
 
 const componentSchema = z.object({
   type: z

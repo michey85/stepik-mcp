@@ -3,7 +3,7 @@ import { z } from 'zod';
 import {
   createExternalGraderStep,
   updateExternalGraderStep,
-} from '../services/stepSources.js';
+} from '../services/stepSources/externalGrader.js';
 
 const taskTypeSchema = z.enum(['javascript', 'nodejs', 'react']);
 

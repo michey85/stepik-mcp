@@ -20,6 +20,7 @@ import registerMonthlyReportTools from './tools/monthly-report-tools.js';
 import registerPeriodStatisticsTools from './tools/period-statistics-tools.js';
 import registerCourseStructureTools from './tools/course-structure-tools.js';
 import registerAnnouncementTools from './tools/announcement-tools.js';
+import registerAttachmentTools from './tools/attachment-tools.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { name, version } = JSON.parse(
@@ -46,6 +47,7 @@ registerSortingTools(server);
 registerMatchingTools(server);
 registerExternalGraderTools(server);
 registerTextTools(server);
+registerAttachmentTools(server);
 registerCourseStructureTools(server);
 registerMonthlyReportTools(server);
 registerPeriodStatisticsTools(server);

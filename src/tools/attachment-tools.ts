@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 import { z } from 'zod';
 import {
-  deleteAttachment,
+  deleteLessonAttachment,
   getLessonAttachments,
   uploadLessonAttachment,
 } from '../services/attachments.js';
@@ -11,7 +11,7 @@ export default function registerAttachmentTools(server: McpServer) {
     'uploadLessonFile',
     {
       description:
-        'Upload a local file to a Stepik lesson as an attachment (the lesson\'s "files" block, downloadable by students). Returns the attachment id and its public URL, which can then be linked from a step\'s HTML.',
+        'Upload a local file to a Stepik lesson as an attachment (the lesson\'s "files" block, downloadable by students). Returns the attachment id and its public URL, which can then be linked from a step\'s HTML. Files under hidden paths (e.g. ~/.ssh, .env*) and files over 100 MB are refused.',
       inputSchema: {
         lessonId: z.number().describe('The ID of the lesson'),
         filePath: z
@@ -68,13 +68,16 @@ export default function registerAttachmentTools(server: McpServer) {
     'deleteLessonFile',
     {
       description:
-        'Remove a file attachment from a Stepik lesson by attachment id (see getLessonFiles). Links to the file already placed in step texts may stop working.',
+        'Remove a file attachment from a Stepik lesson by attachment id (see getLessonFiles). Fails if the attachment does not belong to that lesson. Links to the file already placed in step texts may stop working.',
       inputSchema: {
+        lessonId: z
+          .number()
+          .describe('The ID of the lesson the file belongs to'),
         attachmentId: z.number().describe('The ID of the attachment'),
       },
     },
-    async ({ attachmentId }) => {
-      await deleteAttachment(attachmentId);
+    async ({ lessonId, attachmentId }) => {
+      await deleteLessonAttachment(lessonId, attachmentId);
       return {
         content: [
           {

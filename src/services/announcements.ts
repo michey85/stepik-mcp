@@ -1,5 +1,6 @@
 import { getAccessToken } from './auth.js';
 import type { Meta } from './promoCodes.js';
+import { assertOk, authHeaders } from './stepikApi.js';
 
 const ANNOUNCEMENTS_URL = 'https://stepik.org/api/announcements';
 
@@ -43,21 +44,11 @@ export interface AnnouncementsPage {
   page: number;
 }
 
-async function authHeaders(): Promise<Record<string, string>> {
-  const accessToken = await getAccessToken();
+async function jsonAuthHeaders(): Promise<Record<string, string>> {
   return {
-    Authorization: `Bearer ${accessToken}`,
-    Accept: 'application/json',
+    ...authHeaders(await getAccessToken()),
     'Content-Type': 'application/json',
   };
-}
-
-async function assertOk(response: Response): Promise<void> {
-  if (!response.ok) {
-    throw new Error(
-      `HTTP error! status: ${response.status} ${await response.text()}`,
-    );
-  }
 }
 
 export async function getAnnouncementsByCourse(
@@ -66,7 +57,7 @@ export async function getAnnouncementsByCourse(
 ): Promise<AnnouncementsPage> {
   const response = await fetch(
     `${ANNOUNCEMENTS_URL}?course=${courseId}&page=${page}`,
-    { headers: await authHeaders() },
+    { headers: await jsonAuthHeaders() },
   );
   await assertOk(response);
 
@@ -80,7 +71,7 @@ export async function getAnnouncementsByCourse(
 
 export async function getAnnouncementById(id: number): Promise<Announcement> {
   const response = await fetch(`${ANNOUNCEMENTS_URL}/${id}`, {
-    headers: await authHeaders(),
+    headers: await jsonAuthHeaders(),
   });
   await assertOk(response);
 
@@ -108,7 +99,7 @@ export async function createAnnouncement(
 ): Promise<Announcement> {
   const response = await fetch(ANNOUNCEMENTS_URL, {
     method: 'POST',
-    headers: await authHeaders(),
+    headers: await jsonAuthHeaders(),
     body: JSON.stringify({
       announcement: {
         course: params.courseId,
@@ -144,7 +135,7 @@ export async function updateAnnouncement(
 
   const response = await fetch(`${ANNOUNCEMENTS_URL}/${id}`, {
     method: 'PUT',
-    headers: await authHeaders(),
+    headers: await jsonAuthHeaders(),
     body: JSON.stringify({
       announcement: {
         course: current.course,
@@ -175,7 +166,7 @@ async function postAction(
 ): Promise<string> {
   const response = await fetch(`${ANNOUNCEMENTS_URL}/${id}/${action}`, {
     method: 'POST',
-    headers: await authHeaders(),
+    headers: await jsonAuthHeaders(),
   });
   await assertOk(response);
   return response.text();
@@ -199,7 +190,7 @@ export function abortAnnouncement(id: number): Promise<string> {
 export async function deleteAnnouncement(id: number): Promise<void> {
   const response = await fetch(`${ANNOUNCEMENTS_URL}/${id}`, {
     method: 'DELETE',
-    headers: await authHeaders(),
+    headers: await jsonAuthHeaders(),
   });
   await assertOk(response);
 }

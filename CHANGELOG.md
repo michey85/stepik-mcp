@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Added
+
+- Файлы урока: загрузка локального файла в урок (`uploadLessonFile`), список файлов (`getLessonFiles`) и удаление (`deleteLessonFile`)
+
 ## [1.8.0]
 
 ### Added

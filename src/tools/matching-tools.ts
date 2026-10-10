@@ -10,6 +10,9 @@ const pairSchema = z.object({
   second: z.string().describe('Right-hand item that matches it'),
 });
 
+const pairsDescription =
+  'Correctly matched pairs. "first" values must be unique, and non-blank "second" values must be unique (blank "second" values may repeat).';
+
 export default function registerMatchingTools(server: McpServer) {
   server.registerTool(
     'addMatchingTask',
@@ -20,17 +23,13 @@ export default function registerMatchingTools(server: McpServer) {
         lessonId: z.number().describe('The ID of the lesson'),
         position: z.number().describe('Position of the step within the lesson'),
         question: z.string().describe('The step instructions/question text'),
-        pairs: z.array(pairSchema).min(2).describe('Correctly matched pairs'),
+        pairs: z.array(pairSchema).min(2).describe(pairsDescription),
         preserveFirstsOrder: z
           .boolean()
           .optional()
           .describe(
             'Keep left-hand items in the given order instead of shuffling them too (default: true)',
           ),
-        isHtmlEnabled: z
-          .boolean()
-          .optional()
-          .describe('Whether item texts are rendered as HTML (default: true)'),
         feedbackCorrect: z
           .string()
           .optional()
@@ -53,7 +52,6 @@ export default function registerMatchingTools(server: McpServer) {
       question,
       pairs,
       preserveFirstsOrder,
-      isHtmlEnabled,
       feedbackCorrect,
       feedbackWrong,
       points,
@@ -64,7 +62,6 @@ export default function registerMatchingTools(server: McpServer) {
         question,
         pairs,
         preserveFirstsOrder,
-        isHtmlEnabled,
         feedbackCorrect,
         feedbackWrong,
         points,
@@ -100,7 +97,7 @@ export default function registerMatchingTools(server: McpServer) {
           .min(2)
           .optional()
           .describe(
-            'The full list of correctly matched pairs (replaces all existing pairs)',
+            `The full list of correctly matched pairs (replaces all existing pairs). ${pairsDescription}`,
           ),
         preserveFirstsOrder: z
           .boolean()
@@ -108,10 +105,6 @@ export default function registerMatchingTools(server: McpServer) {
           .describe(
             'Keep left-hand items in the given order instead of shuffling them too',
           ),
-        isHtmlEnabled: z
-          .boolean()
-          .optional()
-          .describe('Whether item texts are rendered as HTML'),
         feedbackCorrect: z
           .string()
           .optional()
@@ -132,7 +125,6 @@ export default function registerMatchingTools(server: McpServer) {
       question,
       pairs,
       preserveFirstsOrder,
-      isHtmlEnabled,
       feedbackCorrect,
       feedbackWrong,
       points,
@@ -143,7 +135,6 @@ export default function registerMatchingTools(server: McpServer) {
         question,
         pairs,
         preserveFirstsOrder,
-        isHtmlEnabled,
         feedbackCorrect,
         feedbackWrong,
         points,

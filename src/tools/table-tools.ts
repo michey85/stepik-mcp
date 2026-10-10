@@ -7,7 +7,7 @@ import {
 
 const rowsSchema = z.array(
   z.object({
-    name: z.string().describe('Row label (HTML allowed)'),
+    name: z.string().describe('Row label (HTML allowed, must be unique)'),
     choices: z
       .array(z.boolean())
       .describe(
@@ -23,8 +23,12 @@ export default function registerTableTools(server: McpServer) {
       description:
         'Add a new table step ("Табличная задача") to a Stepik lesson. Students tick cells in a grid of rows × columns. By default each row has exactly one correct column; set isCheckbox to allow several per row.',
       inputSchema: {
-        lessonId: z.number().describe('The ID of the lesson'),
-        position: z.number().describe('Position of the step within the lesson'),
+        lessonId: z.number().int().positive().describe('The ID of the lesson'),
+        position: z
+          .number()
+          .int()
+          .positive()
+          .describe('Position of the step within the lesson'),
         question: z.string().describe('The step instructions/question text'),
         description: z
           .string()
@@ -34,7 +38,7 @@ export default function registerTableTools(server: McpServer) {
         columns: z
           .array(z.string())
           .min(1)
-          .describe('Column headers (HTML allowed)'),
+          .describe('Column headers (HTML allowed, must be unique)'),
         rows: rowsSchema.min(1).describe('Table rows with their correct cells'),
         isCheckbox: z
           .boolean()
@@ -66,6 +70,8 @@ export default function registerTableTools(server: McpServer) {
           .describe('Optional hint shown when the answer is wrong'),
         points: z
           .number()
+          .int()
+          .nonnegative()
           .optional()
           .describe('Points awarded for completing the step (default: 1)'),
       },
@@ -87,11 +93,17 @@ export default function registerTableTools(server: McpServer) {
     'updateTableTask',
     {
       description:
-        'Update an existing table step ("Табличная задача"). Only the provided fields are changed; everything else is left as-is. When changing columns, pass rows too so every row has one choice per column.',
+        'Update an existing table step ("Табличная задача"). Only the provided fields are changed; everything else is left as-is. Passing columns requires passing rows too, so every row lists one choice per new column. Row and column names must be unique.',
       inputSchema: {
-        stepId: z.number().describe('The ID of the table step to update'),
+        stepId: z
+          .number()
+          .int()
+          .positive()
+          .describe('The ID of the table step to update'),
         position: z
           .number()
+          .int()
+          .positive()
           .optional()
           .describe('New position of the step within the lesson'),
         question: z
@@ -106,7 +118,9 @@ export default function registerTableTools(server: McpServer) {
           .array(z.string())
           .min(1)
           .optional()
-          .describe('The full list of column headers (replaces all columns)'),
+          .describe(
+            'The full list of column headers (replaces all columns; requires rows)',
+          ),
         rows: rowsSchema
           .min(1)
           .optional()
@@ -137,6 +151,8 @@ export default function registerTableTools(server: McpServer) {
           .describe('Hint shown when the answer is wrong'),
         points: z
           .number()
+          .int()
+          .nonnegative()
           .optional()
           .describe('Points awarded for completing the step'),
       },

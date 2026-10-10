@@ -10,6 +10,7 @@ import registerChallengesTools from './tools/challenges-tools.js';
 import registerQuizTools from './tools/quiz-tools.js';
 import registerFillBlanksTools from './tools/fillblanks-tools.js';
 import registerSortingTools from './tools/sorting-tools.js';
+import registerMatchingTools from './tools/matching-tools.js';
 import registerTableTools from './tools/table-tools.js';
 import registerExternalGraderTools from './tools/external-grader-tools.js';
 import registerTextTools from './tools/text-tools.js';
@@ -20,6 +21,7 @@ import registerMonthlyReportTools from './tools/monthly-report-tools.js';
 import registerPeriodStatisticsTools from './tools/period-statistics-tools.js';
 import registerCourseStructureTools from './tools/course-structure-tools.js';
 import registerAnnouncementTools from './tools/announcement-tools.js';
+import registerAttachmentTools from './tools/attachment-tools.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { name, version } = JSON.parse(
@@ -43,9 +45,11 @@ registerChallengesTools(server);
 registerQuizTools(server);
 registerFillBlanksTools(server);
 registerSortingTools(server);
+registerMatchingTools(server);
 registerTableTools(server);
 registerExternalGraderTools(server);
 registerTextTools(server);
+registerAttachmentTools(server);
 registerCourseStructureTools(server);
 registerMonthlyReportTools(server);
 registerPeriodStatisticsTools(server);
